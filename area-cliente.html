@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barsi Bull Trader — Area do Cliente VIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#09090B;--bg2:#0c0e12;--card:#10131a;--card2:#151923;
+--text:#fff;--text-sec:#8a8f98;--text-muted:#505560;
+--green:#6BFF06;--green2:#52CC00;--red:#D64545;--yellow:#FFC300;
+--border:#1a1d24;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+background-image:linear-gradient(rgba(107,255,6,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(107,255,6,.025) 1px,transparent 1px),linear-gradient(rgba(107,255,6,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(107,255,6,.012) 1px,transparent 1px);
+background-size:200px 200px,200px 200px,40px 40px,40px 40px}
+a{text-decoration:none;color:inherit;transition:.3s}
+section,header,.sidebar,.main-content{position:relative;z-index:1}
+
+/* LAYOUT */
+.app-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--card);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;width:240px;z-index:100;display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-logo img{height:30px}
+.sidebar-nav{padding:12px;flex:1}
+.nav-section{margin-bottom:16px}
+.nav-section-title{font-size:.55rem;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);font-family:var(--mono);padding:8px 12px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:.8rem;color:var(--text-sec);cursor:pointer;transition:.2s;font-weight:500}
+.nav-item:hover{background:rgba(107,255,6,.06);color:var(--text)}
+.nav-item.active{background:rgba(107,255,6,.1);color:var(--green);font-weight:600}
+.nav-item i{width:18px;text-align:center;font-size:.8rem}
+.nav-item .badge{margin-left:auto;font-size:.55rem;padding:2px 6px;border-radius:3px;font-weight:700;font-family:var(--mono)}
+.badge-live{background:rgba(214,69,69,.2);color:var(--red);animation:blink 2s infinite}
+.badge-new{background:rgba(107,255,6,.15);color:var(--green)}
+.badge-vip{background:rgba(255,195,0,.15);color:var(--yellow)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.sidebar-user{padding:16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:rgba(107,255,6,.1);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--green)}
+.user-info .user-name{font-size:.8rem;font-weight:600}
+.user-info .user-plan{font-size:.6rem;color:var(--green);font-family:var(--mono)}
+
+/* MAIN */
+.main-content{margin-left:240px;min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(8,9,11,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-left h1{font-size:1.1rem;font-weight:700}
+.topbar-left .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 2s infinite;box-shadow:0 0 8px rgba(107,255,6,.5)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.topbar-btn{width:36px;height:36px;border-radius:8px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-sec);cursor:pointer;transition:.2s;font-size:.85rem}
+.topbar-btn:hover{border-color:var(--green);color:var(--green)}
+.topbar-btn.has-notif{position:relative}
+.topbar-btn.has-notif::after{content:'';position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+
+/* CONTENT */
+.content{padding:24px 28px}
+.content-grid{display:grid;gap:20px}
+
+/* TRADINGVIEW TICKER WIDGET */
+.tv-ticker{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;height:56px}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.kpi .kpi-label{font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-family:var(--mono);margin-bottom:4px}
+.kpi .kpi-value{font-size:1.4rem;font-weight:800;font-family:var(--mono)}
+.kpi .kpi-value.up{color:var(--green)}
+.kpi .kpi-value.down{color:var(--red)}
+.kpi .kpi-change{font-size:.6rem;font-family:var(--mono);margin-top:2px}
+.kpi .kpi-change.up{color:var(--green)}
+.kpi .kpi-change.down{color:var(--red)}
+
+/* MAIN CHART AREA */
+.chart-section{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.chart-main{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.chart-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chart-title{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.chart-title .ct-symbol{color:var(--green);font-family:var(--mono)}
+.chart-tabs{display:flex;gap:0}
+.chart-tab{padding:6px 14px;font-size:.65rem;color:var(--text-muted);cursor:pointer;border-radius:4px;font-family:var(--mono);transition:.2s}
+.chart-tab:hover,.chart-tab.active{background:rgba(107,255,6,.1);color:var(--green)}
+.chart-body{height:450px}
+
+/* ANALYSIS PANEL */
+.analysis-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.ap-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ap-title{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.ap-title .vip-tag{font-size:.5rem;padding:2px 6px;border-radius:3px;background:rgba(255,195,0,.15);color:var(--yellow);font-weight:700;font-family:var(--mono);letter-spacing:.5px}
+.ap-body{flex:1;overflow-y:auto;padding:0}
+
+.analysis-card{padding:16px 18px;border-bottom:1px solid var(--border);transition:.2s;cursor:pointer}
+.analysis-card:hover{background:rgba(107,255,6,.03)}
+.ac-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ac-asset{display:flex;align-items:center;gap:8px}
+.ac-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;font-family:var(--mono)}
+.ac-icon.win{background:rgba(107,255,6,.1);color:var(--green)}
+.ac-icon.wdo{background:rgba(100,149,237,.1);color:#6495ED}
+.ac-icon.btc{background:rgba(255,195,0,.1);color:var(--yellow)}
+.ac-name{font-size:.8rem;font-weight:600}
+.ac-time{font-size:.55rem;color:var(--text-muted);font-family:var(--mono)}
+.ac-direction{display:flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;font-family:var(--mono);padding:3px 8px;border-radius:3px}
+.dir-buy{background:rgba(107,255,6,.1);color:var(--green)}
+.dir-sell{background:rgba(214,69,69,.1);color:var(--red)}
+.dir-neutral{background:rgba(255,255,255,.05);color:var(--text-sec)}
+.ac-body{font-size:.75rem;color:var(--text-sec);line-height:1.5;margin-bottom:8px}
+.ac-levels{display:flex;gap:8px;flex-wrap:wrap}
+.ac-level{font-size:.6rem;padding:3px 8px;border-radius:3px;font-family:var(--mono);font-weight:600}
+.level-entry{background:rgba(107,255,6,.08);color:var(--green);border:1px solid rgba(107,255,6,.12)}
+.level-stop{background:rgba(214,69,69,.08);color:var(--red);border:1px solid rgba(214,69,69,.12)}
+.level-target{background:rgba(100,149,237,.08);color:#6495ED;border:1px solid rgba(100,149,237,.12)}
+
+/* BOTTOM ROW */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ECONOMIC CALENDAR */
+.calendar-section{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cal-header{padding:14px 18px;border-bottom:1px solid var(--border)}
+.cal-title{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.cal-title i{color:var(--green)}
+.cal-body{height:400px;overflow:hidden}
+
+/* MARKET OVERVIEW */
+.market-overview{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.mo-header{padding:14px 18px;border-bottom:1px solid var(--border)}
+.mo-title{font-size:.85rem;font-weight:700}
+.mo-body{height:400px;overflow:hidden}
+
+/* EXTRA CHARTS ROW */
+.extra-charts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.extra-chart{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ec-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ec-title{font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:6px}
+.ec-title i{color:var(--green);font-size:.65rem}
+.ec-body{height:300px}
+
+/* RESPONSIVE */
+@media(max-width:1200px){
+.kpi-row{grid-template-columns:repeat(3,1fr)}
+.chart-section{grid-template-columns:1fr}
+.extra-charts{grid-template-columns:1fr}
+}
+@media(max-width:1024px){
+.sidebar{display:none}
+.main-content{margin-left:0}
+.bottom-row{grid-template-columns:1fr}
+.kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+.kpi-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="sidebar-logo">
+<img src="IMG_1307.PNG" alt="Barsi Bull Trader">
+</div>
+<nav class="sidebar-nav">
+<div class="nav-section">
+<div class="nav-section-title">Principal</div>
+<div class="nav-item active"><i class="fas fa-chart-line"></i> Dashboard<span class="badge badge-live">LIVE</span></div>
+<div class="nav-item"><i class="fas fa-crosshairs"></i> Analises VIP<span class="badge badge-vip">VIP</span></div>
+<div class="nav-item"><i class="fas fa-book-open"></i> Diario de Trade</div>
+<div class="nav-item"><i class="fas fa-bullseye"></i> Golden Points<span class="badge badge-new">NEW</span></div>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Trading</div>
+<div class="nav-item"><i class="fas fa-users"></i> Acompanhamento</div>
+<div class="nav-item"><i class="fas fa-copy"></i> Copy Trade</div>
+<a href="automacoes-ontick.html" class="nav-item"><i class="fas fa-robot"></i> Automacoes<span class="badge badge-new">GRÁTIS</span></a>
+<div class="nav-item"><i class="fas fa-trophy"></i> Campeonatos</div>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Educacional</div>
+<div class="nav-item"><i class="fas fa-play-circle"></i> Academy</div>
+<div class="nav-item"><i class="fas fa-microphone"></i> Morning Call<span class="badge badge-live">AO VIVO</span></div>
+<div class="nav-item"><i class="fas fa-calendar"></i> Calendario</div>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Marketplace</div>
+<div class="nav-item"><i class="fas fa-store"></i> Produtos</div>
+<div class="nav-item"><i class="fas fa-users-rectangle"></i> Influenciadores</div>
+<div class="nav-item"><i class="fas fa-bag-shopping"></i> Loja</div>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Conta</div>
+<div class="nav-item"><i class="fas fa-chart-bar"></i> Relatorios</div>
+<div class="nav-item"><i class="fas fa-ranking-star"></i> Ranking</div>
+<div class="nav-item"><i class="fas fa-gear"></i> Configuracoes</div>
+</div>
+</nav>
+<div class="sidebar-user">
+<div class="user-avatar">HM</div>
+<div class="user-info"><div class="user-name">Henrique M.</div><div class="user-plan">PLANO BULL // VIP</div></div>
+</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+<!-- TOPBAR -->
+<div class="topbar">
+<div class="topbar-left">
+<h1>Dashboard</h1>
+<div class="live-dot"></div>
+<span style="font-size:.65rem;color:var(--green);font-family:var(--mono)">MERCADO ABERTO</span>
+</div>
+<div class="topbar-right">
+<div class="topbar-btn"><i class="fas fa-search"></i></div>
+<div class="topbar-btn has-notif"><i class="fas fa-bell"></i></div>
+<div class="topbar-btn"><i class="fas fa-expand"></i></div>
+</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+<div class="content-grid">
+
+<!-- TRADINGVIEW TICKER TAPE - REAL TIME -->
+<div class="tv-ticker">
+<!-- TradingView Widget: Ticker Tape -->
+<div class="tradingview-widget-container">
+<div class="tradingview-widget-container__widget"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+{
+"symbols": [
+{"proName":"BMFBOVESPA:IND1!","title":"Mini Indice"},
+{"proName":"BMFBOVESPA:DOL1!","title":"Mini Dolar"},
+{"proName":"BMFBOVESPA:IBOV","title":"Ibovespa"},
+{"proName":"BITSTAMP:BTCUSD","title":"Bitcoin"},
+{"proName":"BITSTAMP:ETHUSD","title":"Ethereum"},
+{"proName":"FX:USDBRL","title":"Dolar/Real"},
+{"proName":"BMFBOVESPA:PETR4","title":"Petrobras"},
+{"proName":"BMFBOVESPA:VALE3","title":"Vale"},
+{"proName":"TVC:GOLD","title":"Ouro"},
+{"proName":"BINANCE:SOLUSDT","title":"Solana"}
+],
+"showSymbolLogo": true,
+"isTransparent": true,
+"displayMode": "adaptive",
+"colorTheme": "dark",
+"locale": "br"
+}
+</script>
+</div>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-row">
+<div class="kpi"><div class="kpi-label">Mini Indice (WIN)</div><div class="kpi-value up" id="win-price">131.450</div><div class="kpi-change up">+820 pts (+0.63%)</div></div>
+<div class="kpi"><div class="kpi-label">Mini Dolar (WDO)</div><div class="kpi-value down" id="wdo-price">5.842</div><div class="kpi-change down">-12 pts (-0.21%)</div></div>
+<div class="kpi"><div class="kpi-label">Bitcoin (BTC)</div><div class="kpi-value up">$87.420</div><div class="kpi-change up">+2.34%</div></div>
+<div class="kpi"><div class="kpi-label">Dolar/Real</div><div class="kpi-value down">R$ 5,84</div><div class="kpi-change down">-0.18%</div></div>
+<div class="kpi"><div class="kpi-label">Ibovespa</div><div class="kpi-value up">131.420</div><div class="kpi-change up">+1.620 pts (+1.24%)</div></div>
+</div>
+
+<!-- MAIN CHART + ANALYSIS -->
+<div class="chart-section">
+<!-- TradingView Advanced Chart - REAL -->
+<div class="chart-main">
+<div class="chart-header">
+<div class="chart-title"><span class="ct-symbol">WIN</span> Mini Indice — Grafico Tempo Real</div>
+<div class="chart-tabs">
+<div class="chart-tab">1m</div>
+<div class="chart-tab">5m</div>
+<div class="chart-tab active">15m</div>
+<div class="chart-tab">1h</div>
+<div class="chart-tab">D</div>
+</div>
+</div>
+<div class="chart-body">
+<!-- TradingView Widget: Advanced Chart -->
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+{
+"autosize": true,
+"symbol": "BMFBOVESPA:IND1!",
+"interval": "15",
+"timezone": "America/Sao_Paulo",
+"theme": "dark",
+"style": "1",
+"locale": "br",
+"backgroundColor": "rgba(16, 19, 26, 1)",
+"gridColor": "rgba(46, 204, 113, 0.04)",
+"allow_symbol_change": true,
+"calendar": false,
+"hide_top_toolbar": false,
+"hide_legend": false,
+"save_image": false,
+"support_host": "https://www.tradingview.com"
+}
+</script>
+</div>
+</div>
+</div>
+
+<!-- DAILY ANALYSIS PANEL - VIP -->
+<div class="analysis-panel">
+<div class="ap-header">
+<div class="ap-title"><i class="fas fa-crosshairs" style="color:var(--green)"></i> Analises do Dia <span class="vip-tag">VIP</span></div>
+<span style="font-size:.6rem;color:var(--text-muted);font-family:var(--mono)">15/03/2026</span>
+</div>
+<div class="ap-body">
+
+<!-- ANALYSIS: MINI INDICE -->
+<div class="analysis-card">
+<div class="ac-top">
+<div class="ac-asset"><div class="ac-icon win">W</div><div><div class="ac-name">Mini Indice (WIN)</div><div class="ac-time">08:45 — Pre-abertura</div></div></div>
+<div class="ac-direction dir-buy"><i class="fas fa-arrow-up"></i> COMPRA</div>
+</div>
+<div class="ac-body">Indice abrindo acima da media de 21 periodos no 15min. Fluxo comprador institucional detectado na regiao dos 131.200. Buscar entrada na retração para os Golden Points marcados.</div>
+<div class="ac-levels">
+<span class="ac-level level-entry">Entrada: 131.280</span>
+<span class="ac-level level-stop">Stop: 130.950</span>
+<span class="ac-level level-target">Alvo 1: 131.600</span>
+<span class="ac-level level-target">Alvo 2: 131.850</span>
+</div>
+</div>
+
+<!-- ANALYSIS: MINI DOLAR -->
+<div class="analysis-card">
+<div class="ac-top">
+<div class="ac-asset"><div class="ac-icon wdo">D</div><div><div class="ac-name">Mini Dolar (WDO)</div><div class="ac-time">08:45 — Pre-abertura</div></div></div>
+<div class="ac-direction dir-sell"><i class="fas fa-arrow-down"></i> VENDA</div>
+</div>
+<div class="ac-body">Dolar perdendo suporte da consolidacao em 5.850. DXY em queda no pre-mercado americano. Cenario de fraqueza confirmado abaixo de 5.845.</div>
+<div class="ac-levels">
+<span class="ac-level level-entry">Entrada: 5.845</span>
+<span class="ac-level level-stop">Stop: 5.868</span>
+<span class="ac-level level-target">Alvo 1: 5.825</span>
+<span class="ac-level level-target">Alvo 2: 5.800</span>
+</div>
+</div>
+
+<!-- ANALYSIS: BITCOIN -->
+<div class="analysis-card">
+<div class="ac-top">
+<div class="ac-asset"><div class="ac-icon btc">B</div><div><div class="ac-name">Bitcoin (BTC/USD)</div><div class="ac-time">08:45 — 24h</div></div></div>
+<div class="ac-direction dir-buy"><i class="fas fa-arrow-up"></i> COMPRA</div>
+</div>
+<div class="ac-body">Bitcoin rompendo resistencia dos $87k com volume acima da media. Halving effect em andamento. Buscar pullback na regiao dos $86.800 para entrada longa.</div>
+<div class="ac-levels">
+<span class="ac-level level-entry">Entrada: $86.800</span>
+<span class="ac-level level-stop">Stop: $85.200</span>
+<span class="ac-level level-target">Alvo 1: $89.500</span>
+<span class="ac-level level-target">Alvo 2: $92.000</span>
+</div>
+</div>
+
+<!-- ANALYSIS: IBOV -->
+<div class="analysis-card">
+<div class="ac-top">
+<div class="ac-asset"><div class="ac-icon win">I</div><div><div class="ac-name">Ibovespa (IBOV)</div><div class="ac-time">08:45 — Swing</div></div></div>
+<div class="ac-direction dir-neutral"><i class="fas fa-minus"></i> NEUTRO</div>
+</div>
+<div class="ac-body">Ibovespa em zona de decisao. Acumulando entre 130.800 e 132.000. Aguardar rompimento com volume para definir direcao. Ficar de fora ate confirmacao.</div>
+<div class="ac-levels">
+<span class="ac-level level-entry">Compra acima: 132.050</span>
+<span class="ac-level level-entry">Venda abaixo: 130.750</span>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- BOTTOM ROW: CALENDAR + MARKET OVERVIEW -->
+<div class="bottom-row">
+<!-- Economic Calendar - TradingView -->
+<div class="calendar-section">
+<div class="cal-header"><div class="cal-title"><i class="fas fa-calendar-days"></i> Calendario Economico</div></div>
+<div class="cal-body">
+<!-- TradingView Widget: Economic Calendar -->
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+{
+"colorTheme": "dark",
+"isTransparent": true,
+"width": "100%",
+"height": "100%",
+"locale": "br",
+"importanceFilter": "0,1",
+"countryFilter": "br,us"
+}
+</script>
+</div>
+</div>
+</div>
+
+<!-- Market Overview - TradingView -->
+<div class="market-overview">
+<div class="mo-header"><div class="mo-title"><i class="fas fa-globe" style="color:var(--green);margin-right:6px"></i> Visao Geral do Mercado</div></div>
+<div class="mo-body">
+<!-- TradingView Widget: Market Overview -->
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+{
+"colorTheme": "dark",
+"dateRange": "1D",
+"showChart": true,
+"locale": "br",
+"isTransparent": true,
+"showSymbolLogo": true,
+"showFloatingTooltip": true,
+"width": "100%",
+"height": "100%",
+"tabs": [
+{
+"title": "Indices",
+"symbols": [
+{"s":"BMFBOVESPA:IBOV","d":"Ibovespa"},
+{"s":"SP:SPX","d":"S&P 500"},
+{"s":"NASDAQ:NDX","d":"Nasdaq 100"},
+{"s":"TVC:DXY","d":"Dolar Index"}
+]
+},
+{
+"title": "Futuros",
+"symbols": [
+{"s":"BMFBOVESPA:IND1!","d":"Mini Indice"},
+{"s":"BMFBOVESPA:DOL1!","d":"Mini Dolar"},
+{"s":"BMFBOVESPA:WIN1!","d":"WIN"},
+{"s":"BMFBOVESPA:WDO1!","d":"WDO"}
+]
+},
+{
+"title": "Crypto",
+"symbols": [
+{"s":"BITSTAMP:BTCUSD","d":"Bitcoin"},
+{"s":"BITSTAMP:ETHUSD","d":"Ethereum"},
+{"s":"BINANCE:SOLUSDT","d":"Solana"},
+{"s":"TVC:GOLD","d":"Ouro"}
+]
+}
+]
+}
+</script>
+</div>
+</div>
+</div>
+</div>
+
+<!-- EXTRA CHARTS: DOL, BTC, ETH -->
+<div class="extra-charts">
+<div class="extra-chart">
+<div class="ec-header"><div class="ec-title"><i class="fas fa-chart-line"></i> Dolar / Real</div></div>
+<div class="ec-body">
+<!-- TradingView Widget: Mini Chart -->
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+{
+"symbol": "FX:USDBRL",
+"width": "100%",
+"height": "100%",
+"locale": "br",
+"dateRange": "1D",
+"colorTheme": "dark",
+"isTransparent": true,
+"autosize": true,
+"largeChartUrl": ""
+}
+</script>
+</div>
+</div>
+</div>
+<div class="extra-chart">
+<div class="ec-header"><div class="ec-title"><i class="fab fa-bitcoin"></i> Bitcoin / USD</div></div>
+<div class="ec-body">
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+{
+"symbol": "BITSTAMP:BTCUSD",
+"width": "100%",
+"height": "100%",
+"locale": "br",
+"dateRange": "1D",
+"colorTheme": "dark",
+"isTransparent": true,
+"autosize": true,
+"largeChartUrl": ""
+}
+</script>
+</div>
+</div>
+</div>
+<div class="extra-chart">
+<div class="ec-header"><div class="ec-title"><i class="fas fa-coins"></i> Ethereum / USD</div></div>
+<div class="ec-body">
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+{
+"symbol": "BITSTAMP:ETHUSD",
+"width": "100%",
+"height": "100%",
+"locale": "br",
+"dateRange": "1D",
+"colorTheme": "dark",
+"isTransparent": true,
+"autosize": true,
+"largeChartUrl": ""
+}
+</script>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

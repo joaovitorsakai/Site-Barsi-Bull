@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barsi Bull Trader — Portal do Influenciador</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#09090B;--bg2:#0c0e12;--card:#10131a;--card2:#151923;--card3:#1a1f2b;
+--text:#fff;--text-sec:#8a8f98;--text-muted:#505560;
+--green:#6BFF06;--green2:#52CC00;--green-glow:rgba(107,255,6,.12);
+--red:#D64545;--border:#1a1d24;--border-g:rgba(107,255,6,.1);
+--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* GRID BACKGROUND */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+background-image:
+linear-gradient(rgba(107,255,6,.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(107,255,6,.03) 1px,transparent 1px),
+linear-gradient(rgba(107,255,6,.015) 1px,transparent 1px),
+linear-gradient(90deg,rgba(107,255,6,.015) 1px,transparent 1px);
+background-size:200px 200px,200px 200px,40px 40px,40px 40px}
+
+a{text-decoration:none;color:inherit;transition:.3s}
+img{max-width:100%;display:block}
+section,header,footer,.glow-strip{position:relative;z-index:1}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* TOPBAR */
+header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(8,9,11,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;justify-content:center;padding:0 24px}
+.topbar{max-width:1200px;width:100%;display:flex;align-items:center;justify-content:space-between}
+.logo-img{height:34px}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text-sec);font-size:.78rem;font-weight:500}
+.nav a:hover{color:var(--green)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:6px;font-weight:600;font-size:.8rem;cursor:pointer;border:none;transition:.3s}
+.btn-green{background:var(--green);color:#09090B}
+.btn-green:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 30px rgba(107,255,6,.25)}
+.btn-outline{border:1px solid var(--border);background:transparent;color:var(--text-sec)}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-lg{padding:14px 32px;font-size:.9rem}
+.btn-xl{padding:18px 44px;font-size:1rem;border-radius:8px}
+
+/* GLOW STRIP */
+.glow-strip{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);margin-top:60px;opacity:.5}
+
+/* ====== HERO ====== */
+.hero{padding:100px 0 80px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-300px;left:50%;transform:translateX(-50%);width:1200px;height:1200px;background:radial-gradient(circle,rgba(107,255,6,.06) 0%,transparent 45%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:300px;background:linear-gradient(180deg,transparent,var(--bg));pointer-events:none}
+.hero>*{position:relative;z-index:2}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(107,255,6,.06);border:1px solid rgba(107,255,6,.12);padding:6px 16px;border-radius:100px;font-size:.7rem;color:var(--green);font-weight:600;font-family:var(--mono);letter-spacing:1px;margin-bottom:24px}
+.hero-eyebrow .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(107,255,6,.4)}50%{opacity:.8;box-shadow:0 0 0 12px rgba(107,255,6,0)}}
+.hero h1{font-size:4rem;font-weight:900;line-height:1.05;margin-bottom:20px;letter-spacing:-.04em}
+.hero h1 .green{color:var(--green);position:relative}
+.hero h1 .green::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:3px;background:var(--green);border-radius:2px;opacity:.4}
+.hero-sub{font-size:1.15rem;color:var(--text-sec);max-width:620px;margin:0 auto 40px;line-height:1.7}
+.hero-ctas{display:flex;gap:14px;justify-content:center;margin-bottom:60px}
+.hero-numbers{display:flex;gap:48px;justify-content:center}
+.hero-num{text-align:center}
+.hero-num .val{font-size:2.5rem;font-weight:900;color:var(--green);font-family:var(--mono);display:block}
+.hero-num .lbl{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+/* ====== SHOWCASE - INFLUENCER CARDS ====== */
+.showcase{padding:80px 0;overflow:hidden}
+.showcase-title{text-align:center;margin-bottom:48px}
+.showcase-title h2{font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.showcase-title p{color:var(--text-sec);font-size:.9rem}
+
+/* Animated horizontal scroll */
+.influencer-track{display:flex;gap:16px;animation:scrollTrack 40s linear infinite;width:max-content}
+.influencer-track:hover{animation-play-state:paused}
+@keyframes scrollTrack{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.inf-card{width:320px;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.4s;cursor:pointer;position:relative}
+.inf-card:hover{border-color:rgba(107,255,6,.3);transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 40px rgba(107,255,6,.08)}
+.inf-banner{height:100px;position:relative;overflow:hidden}
+.inf-banner.b1{background:linear-gradient(135deg,#0a1a0f,#0d2215)}
+.inf-banner.b2{background:linear-gradient(135deg,#0d1520,#0a1a12)}
+.inf-banner.b3{background:linear-gradient(135deg,#0f0d1a,#0d1a14)}
+.inf-banner.b4{background:linear-gradient(135deg,#1a140d,#0d1a0f)}
+.inf-banner.b5{background:linear-gradient(135deg,#0d0d1a,#0a1a0d)}
+.inf-banner.b6{background:linear-gradient(135deg,#0a1a14,#141a0d)}
+.inf-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--card))}
+.inf-banner .inf-verified{position:absolute;top:10px;right:10px;background:rgba(107,255,6,.2);border:1px solid rgba(107,255,6,.3);border-radius:4px;padding:2px 8px;font-size:.55rem;color:var(--green);font-weight:700;font-family:var(--mono);letter-spacing:.5px;z-index:2;display:flex;align-items:center;gap:4px}
+.inf-banner .inf-tier{position:absolute;top:10px;left:10px;border-radius:4px;padding:2px 8px;font-size:.55rem;font-weight:700;font-family:var(--mono);letter-spacing:.5px;z-index:2}
+.tier-gold{background:rgba(107,255,6,.2);color:var(--green);border:1px solid rgba(107,255,6,.3)}
+.tier-silver{background:rgba(192,192,192,.15);color:#C0C0C0;border:1px solid rgba(192,192,192,.2)}
+.tier-bronze{background:rgba(205,127,50,.15);color:#CD7F32;border:1px solid rgba(205,127,50,.2)}
+.inf-body{padding:20px}
+.inf-avatar{width:56px;height:56px;border-radius:50%;background:var(--card2);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:var(--green);margin-top:-44px;position:relative;z-index:2}
+.inf-name{font-size:1rem;font-weight:700;margin:10px 0 2px}
+.inf-handle{font-size:.7rem;color:var(--green);font-family:var(--mono)}
+.inf-desc{font-size:.75rem;color:var(--text-sec);margin:8px 0 14px;line-height:1.5}
+.inf-stats{display:flex;gap:16px;margin-bottom:14px}
+.inf-stat{text-align:center;flex:1;padding:8px 0;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
+.inf-stat .is-val{font-size:.9rem;font-weight:700;color:var(--green);font-family:var(--mono);display:block}
+.inf-stat .is-lbl{font-size:.55rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.inf-products{display:flex;gap:6px;flex-wrap:wrap}
+.inf-prod{font-size:.6rem;padding:3px 8px;border-radius:3px;background:rgba(107,255,6,.06);color:var(--green);font-family:var(--mono);border:1px solid rgba(107,255,6,.1)}
+
+/* ====== HOW IT WORKS ====== */
+.how-section{padding:100px 0}
+.how-header{text-align:center;margin-bottom:64px}
+.how-header .label{font-size:.65rem;text-transform:uppercase;letter-spacing:3px;color:var(--green);font-weight:700;font-family:var(--mono);margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.how-header .label::before,.how-header .label::after{content:'';width:24px;height:1px;background:var(--green);opacity:.3}
+.how-header h2{font-size:2.4rem;font-weight:800;margin-bottom:12px}
+.how-header p{color:var(--text-sec);max-width:500px;margin:0 auto;font-size:.95rem}
+
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);border-radius:var(--radius-lg,16px);overflow:hidden}
+.how-step{background:var(--card);padding:40px 28px;text-align:center;transition:.3s;position:relative}
+.how-step:hover{background:var(--card2)}
+.how-step::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:2px;background:var(--green);opacity:0;transition:.3s}
+.how-step:hover::before{opacity:1}
+.step-num{font-size:.6rem;color:var(--green);font-weight:700;letter-spacing:3px;font-family:var(--mono);margin-bottom:16px}
+.step-icon{width:56px;height:56px;border-radius:12px;background:rgba(107,255,6,.06);border:1px solid rgba(107,255,6,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.3rem;color:var(--green);transition:.3s}
+.how-step:hover .step-icon{background:rgba(107,255,6,.12);transform:scale(1.05)}
+.how-step h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
+.how-step p{font-size:.78rem;color:var(--text-sec);line-height:1.6}
+.step-arrow{display:none}
+
+/* ====== PRODUCT TYPES ====== */
+.product-types{padding:80px 0}
+.pt-header{text-align:center;margin-bottom:52px}
+.pt-header h2{font-size:2.2rem;font-weight:800;margin-bottom:10px}
+.pt-header p{color:var(--text-sec);font-size:.95rem}
+.pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.4s;position:relative}
+.pt-card:hover{border-color:rgba(107,255,6,.25);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.pt-card-glow{position:absolute;top:0;left:0;right:0;height:120px;opacity:0;transition:.4s}
+.pt-card:hover .pt-card-glow{opacity:1}
+.pt-card-glow.g1{background:radial-gradient(ellipse at 50% 0%,rgba(107,255,6,.08),transparent 70%)}
+.pt-card-glow.g2{background:radial-gradient(ellipse at 50% 0%,rgba(100,149,237,.06),transparent 70%)}
+.pt-card-glow.g3{background:radial-gradient(ellipse at 50% 0%,rgba(231,76,60,.06),transparent 70%)}
+.pt-top{padding:32px 28px 20px;position:relative;z-index:1}
+.pt-icon{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:16px}
+.pt-icon.pi1{background:rgba(107,255,6,.1);color:var(--green);border:1px solid rgba(107,255,6,.15)}
+.pt-icon.pi2{background:rgba(100,149,237,.1);color:#6495ED;border:1px solid rgba(100,149,237,.15)}
+.pt-icon.pi3{background:rgba(231,76,60,.08);color:#E74C3C;border:1px solid rgba(231,76,60,.1)}
+.pt-card h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.pt-card>p,.pt-top>p{font-size:.8rem;color:var(--text-sec);line-height:1.6}
+.pt-examples{padding:0 28px 28px;position:relative;z-index:1}
+.pt-examples-title{font-size:.6rem;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);font-family:var(--mono);margin-bottom:10px}
+.pt-example{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;margin-bottom:6px}
+.pt-example .pe-name{font-size:.78rem;font-weight:600}
+.pt-example .pe-price{font-size:.7rem;color:var(--green);font-family:var(--mono);font-weight:600}
+.pt-example .pe-comm{font-size:.6rem;color:var(--text-muted);font-family:var(--mono)}
+
+/* ====== DASHBOARD PREVIEW ====== */
+.dash-section{padding:100px 0;overflow:hidden}
+.dash-header{text-align:center;margin-bottom:52px}
+.dash-header h2{font-size:2.2rem;font-weight:800;margin-bottom:10px}
+.dash-header p{color:var(--text-sec);font-size:.95rem;max-width:500px;margin:0 auto}
+
+.dash-preview{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.5);max-width:1000px;margin:0 auto}
+.dash-bar{display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border)}
+.dash-dot{width:8px;height:8px;border-radius:50%}
+.dash-dot.r{background:#D64545}.dash-dot.y{background:#FFC300}.dash-dot.g{background:#6BFF06}
+.dash-bar-title{font-size:.6rem;color:var(--text-muted);font-family:var(--mono);margin-left:8px}
+.dash-bar-tabs{display:flex;gap:0;margin-left:auto}
+.dash-tab{padding:6px 16px;font-size:.65rem;color:var(--text-muted);font-family:var(--mono);border-bottom:2px solid transparent;cursor:pointer;transition:.3s}
+.dash-tab.active{color:var(--green);border-color:var(--green)}
+.dash-content{padding:28px}
+.dash-top-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.dash-kpi{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:18px}
+.dash-kpi .kpi-label{font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-family:var(--mono)}
+.dash-kpi .kpi-value{font-size:1.5rem;font-weight:800;margin-top:4px;font-family:var(--mono)}
+.dash-kpi .kpi-value.up{color:var(--green)}
+.dash-kpi .kpi-change{font-size:.6rem;color:var(--green);font-family:var(--mono);margin-top:2px}
+
+.dash-mid-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.dash-chart-area{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px}
+.dash-chart-title{font-size:.7rem;color:var(--text-sec);font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.dash-chart-title span{font-size:.6rem;color:var(--green);font-family:var(--mono)}
+.dash-chart{width:100%;height:140px}
+.dash-chart svg{width:100%;height:100%}
+.dash-products-list{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px}
+.dash-products-title{font-size:.7rem;color:var(--text-sec);font-weight:600;margin-bottom:12px}
+.dp-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.dp-item:last-child{border:0}
+.dp-name{font-size:.75rem;font-weight:600}
+.dp-sales{font-size:.65rem;color:var(--green);font-family:var(--mono)}
+.dp-revenue{font-size:.7rem;font-weight:700;font-family:var(--mono)}
+
+.dash-bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-recent{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px}
+.dash-recent-title{font-size:.7rem;color:var(--text-sec);font-weight:600;margin-bottom:10px}
+.dr-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.dr-item:last-child{border:0}
+.dr-avatar{width:28px;height:28px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--green);flex-shrink:0}
+.dr-info{flex:1}
+.dr-info .dr-name{font-size:.7rem;font-weight:600}
+.dr-info .dr-detail{font-size:.6rem;color:var(--text-muted)}
+.dr-amount{font-size:.7rem;font-weight:700;color:var(--green);font-family:var(--mono)}
+
+/* ====== TIERS ====== */
+.tiers-section{padding:100px 0}
+.tiers-header{text-align:center;margin-bottom:52px}
+.tiers-header h2{font-size:2.2rem;font-weight:800;margin-bottom:10px}
+.tiers-header p{color:var(--text-sec);font-size:.95rem;max-width:500px;margin:0 auto}
+.tiers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tier-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px 32px;text-align:center;transition:.4s;position:relative;overflow:hidden}
+.tier-card:hover{transform:translateY(-4px)}
+.tier-card.t-featured{border-color:rgba(107,255,6,.3);box-shadow:0 0 60px rgba(107,255,6,.06)}
+.tier-card.t-featured::before{content:'TOP TIER';position:absolute;top:0;left:0;right:0;background:var(--green);color:#09090B;padding:4px;font-size:.55rem;font-weight:800;letter-spacing:2px;font-family:var(--mono);text-align:center}
+.tier-card.t-featured{padding-top:52px}
+.tier-medal{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px}
+.medal-bronze{background:rgba(205,127,50,.12);color:#CD7F32;border:2px solid rgba(205,127,50,.2)}
+.medal-silver{background:rgba(192,192,192,.12);color:#C0C0C0;border:2px solid rgba(192,192,192,.2)}
+.medal-gold{background:rgba(107,255,6,.12);color:var(--green);border:2px solid rgba(107,255,6,.2)}
+.tier-card h3{font-size:1.3rem;font-weight:800;margin-bottom:4px}
+.tier-card .tier-pct{font-size:2.5rem;font-weight:900;color:var(--green);font-family:var(--mono);margin:12px 0 4px}
+.tier-card .tier-pct span{font-size:1rem}
+.tier-card .tier-sub{font-size:.75rem;color:var(--text-muted);margin-bottom:20px}
+.tier-features{list-style:none;text-align:left;margin-bottom:24px}
+.tier-features li{font-size:.8rem;color:var(--text-sec);padding:6px 0;display:flex;align-items:center;gap:8px}
+.tier-features li i{color:var(--green);font-size:.65rem}
+.tier-card .btn{width:100%;justify-content:center}
+
+/* ====== CTA ====== */
+.cta{padding:100px 0;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(107,255,6,.05) 0%,transparent 50%);pointer-events:none}
+.cta>*{position:relative;z-index:1}
+.cta h2{font-size:2.8rem;font-weight:900;margin-bottom:14px;letter-spacing:-.03em}
+.cta h2 .green{color:var(--green)}
+.cta p{color:var(--text-sec);font-size:1.05rem;max-width:480px;margin:0 auto 36px;line-height:1.7}
+.cta-flex{display:flex;gap:14px;justify-content:center}
+.cta-trust{display:flex;gap:32px;justify-content:center;margin-top:40px}
+.cta-trust-item{font-size:.7rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.cta-trust-item i{color:var(--green)}
+
+/* ====== FOOTER ====== */
+footer{border-top:1px solid var(--border);padding:40px 0 20px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center}
+.footer-inner p{font-size:.65rem;color:var(--text-muted)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:.7rem;color:var(--text-muted)}
+.footer-links a:hover{color:var(--green)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+.hero h1{font-size:2.8rem}
+.how-grid{grid-template-columns:repeat(2,1fr)}
+.pt-grid{grid-template-columns:1fr}
+.tiers-grid{grid-template-columns:1fr}
+.tiers-grid .tier-card.t-featured{order:-1}
+.dash-top-row{grid-template-columns:repeat(2,1fr)}
+.dash-mid-row,.dash-bottom-row{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+.nav{display:none}
+.hero h1{font-size:2rem}
+.hero-numbers{flex-direction:column;gap:20px}
+.hero-ctas{flex-direction:column;align-items:center}
+.how-grid{grid-template-columns:1fr}
+.pt-grid{grid-template-columns:1fr}
+.dash-top-row{grid-template-columns:1fr}
+.cta h2{font-size:2rem}
+.cta-flex{flex-direction:column;align-items:center}
+.cta-trust{flex-direction:column;align-items:center;gap:12px}
+.footer-inner{flex-direction:column;gap:12px;text-align:center}
+.footer-links{flex-wrap:wrap;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header>
+<div class="topbar">
+<img src="IMG_1307.PNG" alt="Barsi Bull Trader" class="logo-img">
+<nav class="nav">
+<a href="barsi-bull-trader.html">Home</a>
+<a href="#how">Como Funciona</a>
+<a href="#products">Produtos</a>
+<a href="#tiers">Niveis</a>
+<a href="#" class="btn btn-green">Quero Ser Parceiro</a>
+</nav>
+</div>
+</header>
+<div class="glow-strip"></div>
+
+<!-- ====== HERO ====== -->
+<section class="hero">
+<div class="container">
+<div class="hero-eyebrow"><div class="pulse"></div> PORTAL DO INFLUENCIADOR — BARSI BULL TRADER</div>
+<h1>Monetize sua audiencia<br>com o mercado <span class="green">financeiro</span></h1>
+<p class="hero-sub">Revenda cursos, automacoes, indicadores e produtos do ecossistema Barsi com sua propria identidade visual. Comissoes de ate 70% com landing page exclusiva.</p>
+<div class="hero-ctas">
+<a href="#" class="btn btn-green btn-xl"><i class="fas fa-rocket"></i> Comecar Agora — Gratis</a>
+<a href="#how" class="btn btn-outline btn-lg"><i class="fas fa-play-circle"></i> Como Funciona</a>
+</div>
+<div class="hero-numbers">
+<div class="hero-num"><span class="val">70%</span><span class="lbl">Comissao Maxima</span></div>
+<div class="hero-num"><span class="val">50+</span><span class="lbl">Produtos para Revender</span></div>
+<div class="hero-num"><span class="val">R$0</span><span class="lbl">Para Comecar</span></div>
+<div class="hero-num"><span class="val">24h</span><span class="lbl">Aprovacao Rapida</span></div>
+</div>
+</div>
+</section>
+
+<!-- ====== INFLUENCER SHOWCASE ====== -->
+<section class="showcase">
+<div class="container">
+<div class="showcase-title">
+<h2>Influenciadores que ja faturam com a Barsi</h2>
+<p>Veja quem ja faz parte do ecossistema e os resultados que estao alcancando</p>
+</div>
+</div>
+<div style="overflow:hidden;padding:0 0 20px">
+<div class="influencer-track">
+<!-- Cards repeating for seamless scroll -->
+<div class="inf-card"><div class="inf-banner b1"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">RM</div><div class="inf-name">Rafael Mendes</div><div class="inf-handle">@rafaelmendes.trade</div><div class="inf-desc">Especialista em mini indice. +120k seguidores no Instagram.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">847</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$124k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Copy Trade</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b2"><span class="inf-tier tier-silver">PRATA</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">LC</div><div class="inf-name">Lucas Costa</div><div class="inf-handle">@lucascosta.invest</div><div class="inf-desc">Day trader e educador financeiro. Foco em gestao de risco.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">412</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$58k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">60%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Indicadores</span><span class="inf-prod">E-books</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b3"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">AS</div><div class="inf-name">Ana Souza</div><div class="inf-handle">@anasouza.trader</div><div class="inf-desc">Trader e influenciadora. Especialista em futuros e cripto.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">1.2k</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$198k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Merchandise</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b4"><span class="inf-tier tier-bronze">BRONZE</span></div><div class="inf-body"><div class="inf-avatar">PT</div><div class="inf-name">Pedro Torres</div><div class="inf-handle">@pedrotorres.fx</div><div class="inf-desc">Novo no ecossistema. Focado em forex e commodities.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">89</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$12k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">50%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">E-books</span><span class="inf-prod">Indicadores</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b5"><span class="inf-tier tier-silver">PRATA</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">MF</div><div class="inf-name">Mariana Ferreira</div><div class="inf-handle">@mariana.trades</div><div class="inf-desc">Educadora financeira. +80k seguidores no YouTube.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">356</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$47k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">60%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Curso</span><span class="inf-prod">Copy Trade</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b6"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">DL</div><div class="inf-name">Daniel Lima</div><div class="inf-handle">@daniellima.op</div><div class="inf-desc">Trader institucional. Mesa propria com +200 alunos formados.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">2.1k</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$312k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Indicadores</span><span class="inf-prod">Copy</span></div></div></div>
+
+<!-- DUPLICATE for seamless loop -->
+<div class="inf-card"><div class="inf-banner b1"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">RM</div><div class="inf-name">Rafael Mendes</div><div class="inf-handle">@rafaelmendes.trade</div><div class="inf-desc">Especialista em mini indice. +120k seguidores no Instagram.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">847</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$124k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Copy Trade</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b2"><span class="inf-tier tier-silver">PRATA</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">LC</div><div class="inf-name">Lucas Costa</div><div class="inf-handle">@lucascosta.invest</div><div class="inf-desc">Day trader e educador financeiro. Foco em gestao de risco.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">412</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$58k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">60%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Indicadores</span><span class="inf-prod">E-books</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b3"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">AS</div><div class="inf-name">Ana Souza</div><div class="inf-handle">@anasouza.trader</div><div class="inf-desc">Trader e influenciadora. Especialista em futuros e cripto.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">1.2k</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$198k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Merchandise</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b4"><span class="inf-tier tier-bronze">BRONZE</span></div><div class="inf-body"><div class="inf-avatar">PT</div><div class="inf-name">Pedro Torres</div><div class="inf-handle">@pedrotorres.fx</div><div class="inf-desc">Novo no ecossistema. Focado em forex e commodities.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">89</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$12k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">50%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">E-books</span><span class="inf-prod">Indicadores</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b5"><span class="inf-tier tier-silver">PRATA</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">MF</div><div class="inf-name">Mariana Ferreira</div><div class="inf-handle">@mariana.trades</div><div class="inf-desc">Educadora financeira. +80k seguidores no YouTube.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">356</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$47k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">60%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Curso</span><span class="inf-prod">Copy Trade</span></div></div></div>
+
+<div class="inf-card"><div class="inf-banner b6"><span class="inf-tier tier-gold">OURO</span><span class="inf-verified"><i class="fas fa-check-circle"></i> VERIFICADO</span></div><div class="inf-body"><div class="inf-avatar">DL</div><div class="inf-name">Daniel Lima</div><div class="inf-handle">@daniellima.op</div><div class="inf-desc">Trader institucional. Mesa propria com +200 alunos formados.</div><div class="inf-stats"><div class="inf-stat"><span class="is-val">2.1k</span><span class="is-lbl">Vendas</span></div><div class="inf-stat"><span class="is-val">R$312k</span><span class="is-lbl">Faturado</span></div><div class="inf-stat"><span class="is-val">70%</span><span class="is-lbl">Comissao</span></div></div><div class="inf-products"><span class="inf-prod">Automacoes</span><span class="inf-prod">Curso</span><span class="inf-prod">Indicadores</span><span class="inf-prod">Copy</span></div></div></div>
+</div>
+</div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<section id="how" class="how-section">
+<div class="container">
+<div class="how-header">
+<div class="label">COMO FUNCIONA</div>
+<h2>4 Passos Para Comecar a Faturar</h2>
+<p>Voce nao precisa criar produto nenhum. A gente cuida de tudo — voce so vende.</p>
+</div>
+<div class="how-grid">
+<div class="how-step"><div class="step-num">PASSO 01</div><div class="step-icon"><i class="fas fa-user-plus"></i></div><h3>Cadastre-se Gratis</h3><p>Crie sua conta em menos de 2 minutos. Sem taxa de adesao, sem compromisso.</p></div>
+<div class="how-step"><div class="step-num">PASSO 02</div><div class="step-icon"><i class="fas fa-palette"></i></div><h3>Personalize sua Pagina</h3><p>Adicione seu logo, cores e identidade visual. Sua landing page, nossa estrutura.</p></div>
+<div class="how-step"><div class="step-num">PASSO 03</div><div class="step-icon"><i class="fas fa-box-open"></i></div><h3>Escolha os Produtos</h3><p>Selecione cursos, automacoes, indicadores e mais do catalogo Barsi para revender.</p></div>
+<div class="how-step"><div class="step-num">PASSO 04</div><div class="step-icon"><i class="fas fa-money-bill-trend-up"></i></div><h3>Divulgue e Fature</h3><p>Compartilhe seu link e receba comissoes de ate 70% em cada venda.</p></div>
+</div>
+</div>
+</section>
+
+<!-- ====== PRODUCT TYPES ====== -->
+<section id="products" class="product-types">
+<div class="container">
+<div class="pt-header">
+<h2>O que Voce Pode Revender</h2>
+<p>Mais de 50 produtos prontos para voce divulgar com sua audiencia</p>
+</div>
+<div class="pt-grid">
+<div class="pt-card">
+<div class="pt-card-glow g1"></div>
+<div class="pt-top"><div class="pt-icon pi1"><i class="fas fa-robot"></i></div><h3>Automacoes & Copy Trade</h3><p>Estrategias automatizadas que operam direto na XP. Seu cliente nao precisa estar na tela — o robo faz tudo.</p></div>
+<div class="pt-examples">
+<div class="pt-examples-title">Exemplos de Produtos</div>
+<div class="pt-example"><span class="pe-name">Automacao Premium</span><span class="pe-price">R$ 297/mes</span></div>
+<div class="pt-example"><span class="pe-name">Copy Trade Institucional</span><span class="pe-price">R$ 497/mes</span></div>
+<div class="pt-example"><span class="pe-name">Pack 5 Estrategias</span><span class="pe-price">R$ 197/mes</span></div>
+</div>
+</div>
+<div class="pt-card">
+<div class="pt-card-glow g2"></div>
+<div class="pt-top"><div class="pt-icon pi2"><i class="fas fa-graduation-cap"></i></div><h3>Cursos & Educacional</h3><p>Conteudo educacional completo: do basico ao avancado. Analise tecnica, psicologia, gestao de risco e mais.</p></div>
+<div class="pt-examples">
+<div class="pt-examples-title">Exemplos de Produtos</div>
+<div class="pt-example"><span class="pe-name">Jornada do Trader</span><span class="pe-price">R$ 497</span></div>
+<div class="pt-example"><span class="pe-name">Analise Tecnica Pro</span><span class="pe-price">R$ 297</span></div>
+<div class="pt-example"><span class="pe-name">Psicologia do Trader</span><span class="pe-price">R$ 197</span></div>
+</div>
+</div>
+<div class="pt-card">
+<div class="pt-card-glow g3"></div>
+<div class="pt-top"><div class="pt-icon pi3"><i class="fas fa-store"></i></div><h3>Digitais & Loja Fisica</h3><p>Indicadores tecnicos, e-books, planilhas, templates e produtos fisicos como touro de mesa e merchandise.</p></div>
+<div class="pt-examples">
+<div class="pt-examples-title">Exemplos de Produtos</div>
+<div class="pt-example"><span class="pe-name">Pack Indicadores</span><span class="pe-price">R$ 97</span></div>
+<div class="pt-example"><span class="pe-name">E-book Gestao de Risco</span><span class="pe-price">R$ 47</span></div>
+<div class="pt-example"><span class="pe-name">Touro de Mesa Premium</span><span class="pe-price">R$ 149</span></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ====== DASHBOARD PREVIEW ====== -->
+<section class="dash-section">
+<div class="container">
+<div class="dash-header">
+<h2>Seu Painel de Controle</h2>
+<p>Acompanhe vendas, comissoes e performance em tempo real com um dashboard profissional.</p>
+</div>
+<div class="dash-preview">
+<div class="dash-bar">
+<div class="dash-dot r"></div><div class="dash-dot y"></div><div class="dash-dot g"></div>
+<span class="dash-bar-title">barsi_affiliate_panel.exe</span>
+<div class="dash-bar-tabs">
+<div class="dash-tab active">Dashboard</div>
+<div class="dash-tab">Produtos</div>
+<div class="dash-tab">Vendas</div>
+<div class="dash-tab">Saques</div>
+</div>
+</div>
+<div class="dash-content">
+<div class="dash-top-row">
+<div class="dash-kpi"><div class="kpi-label">Faturamento Total</div><div class="kpi-value up">R$ 58.420</div><div class="kpi-change">+12.4% vs mes anterior</div></div>
+<div class="dash-kpi"><div class="kpi-label">Comissao Disponivel</div><div class="kpi-value up">R$ 34.652</div><div class="kpi-change">Proximo saque: 20/03</div></div>
+<div class="dash-kpi"><div class="kpi-label">Vendas no Mes</div><div class="kpi-value" style="color:var(--text)">127</div><div class="kpi-change">+23 vs mes anterior</div></div>
+<div class="dash-kpi"><div class="kpi-label">Nivel Atual</div><div class="kpi-value up">PRATA</div><div class="kpi-change">Faltam R$12k para OURO</div></div>
+</div>
+<div class="dash-mid-row">
+<div class="dash-chart-area">
+<div class="dash-chart-title">Faturamento Mensal <span>Ultimos 6 meses</span></div>
+<div class="dash-chart">
+<svg viewBox="0 0 500 140" preserveAspectRatio="none">
+<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6BFF06" stop-opacity=".2"/><stop offset="100%" stop-color="#6BFF06" stop-opacity="0"/></linearGradient></defs>
+<line x1="0" y1="35" x2="500" y2="35" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+<line x1="0" y1="70" x2="500" y2="70" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+<line x1="0" y1="105" x2="500" y2="105" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+<path d="M0,120 L83,100 L166,85 L249,60 L332,45 L415,30 L500,15 L500,140 L0,140 Z" fill="url(#ag)"/>
+<path d="M0,120 L83,100 L166,85 L249,60 L332,45 L415,30 L500,15" fill="none" stroke="#6BFF06" stroke-width="2"/>
+<circle cx="0" cy="120" r="3" fill="#6BFF06"/><circle cx="83" cy="100" r="3" fill="#6BFF06"/><circle cx="166" cy="85" r="3" fill="#6BFF06"/><circle cx="249" cy="60" r="3" fill="#6BFF06"/><circle cx="332" cy="45" r="3" fill="#6BFF06"/><circle cx="415" cy="30" r="3" fill="#6BFF06"/><circle cx="500" cy="15" r="4" fill="#6BFF06"/>
+<text x="0" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Out</text>
+<text x="83" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Nov</text>
+<text x="166" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Dez</text>
+<text x="249" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Jan</text>
+<text x="332" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Fev</text>
+<text x="415" y="136" fill="#505560" font-size="9" font-family="JetBrains Mono">Mar</text>
+</svg>
+</div>
+</div>
+<div class="dash-products-list">
+<div class="dash-products-title">Top Produtos</div>
+<div class="dp-item"><div><div class="dp-name">Automacao Premium</div><div class="dp-sales">52 vendas</div></div><div class="dp-revenue">R$ 15.4k</div></div>
+<div class="dp-item"><div><div class="dp-name">Jornada do Trader</div><div class="dp-sales">38 vendas</div></div><div class="dp-revenue">R$ 18.8k</div></div>
+<div class="dp-item"><div><div class="dp-name">Pack Indicadores</div><div class="dp-sales">24 vendas</div></div><div class="dp-revenue">R$ 2.3k</div></div>
+<div class="dp-item"><div><div class="dp-name">Copy Trade</div><div class="dp-sales">13 vendas</div></div><div class="dp-revenue">R$ 6.4k</div></div>
+</div>
+</div>
+<div class="dash-bottom-row">
+<div class="dash-recent">
+<div class="dash-recent-title">Vendas Recentes</div>
+<div class="dr-item"><div class="dr-avatar">JM</div><div class="dr-info"><div class="dr-name">Joao M. comprou Automacao Premium</div><div class="dr-detail">Hoje, 14:32 — via link Instagram</div></div><div class="dr-amount">+R$ 148</div></div>
+<div class="dr-item"><div class="dr-avatar">CS</div><div class="dr-info"><div class="dr-name">Carlos S. comprou Jornada do Trader</div><div class="dr-detail">Hoje, 11:15 — via link YouTube</div></div><div class="dr-amount">+R$ 248</div></div>
+<div class="dr-item"><div class="dr-avatar">FM</div><div class="dr-info"><div class="dr-name">Fernanda M. comprou Pack Indicadores</div><div class="dr-detail">Ontem, 22:08 — via link Bio</div></div><div class="dr-amount">+R$ 48</div></div>
+</div>
+<div class="dash-recent">
+<div class="dash-recent-title">Materiais de Divulgacao</div>
+<div class="dr-item"><div class="dr-avatar" style="background:rgba(107,255,6,.1)"><i class="fas fa-link" style="font-size:.6rem"></i></div><div class="dr-info"><div class="dr-name">Seu Link de Afiliado</div><div class="dr-detail" style="color:var(--green)">barsi.com/p/seunome</div></div><div class="dr-amount" style="color:var(--text-sec)"><i class="fas fa-copy"></i></div></div>
+<div class="dr-item"><div class="dr-avatar" style="background:rgba(107,255,6,.1)"><i class="fas fa-image" style="font-size:.6rem"></i></div><div class="dr-info"><div class="dr-name">Banners & Criativos</div><div class="dr-detail">12 arquivos disponiveisveis</div></div><div class="dr-amount" style="color:var(--text-sec)"><i class="fas fa-download"></i></div></div>
+<div class="dr-item"><div class="dr-avatar" style="background:rgba(107,255,6,.1)"><i class="fas fa-video" style="font-size:.6rem"></i></div><div class="dr-info"><div class="dr-name">Videos de Divulgacao</div><div class="dr-detail">4 videos prontos</div></div><div class="dr-amount" style="color:var(--text-sec)"><i class="fas fa-download"></i></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ====== TIERS ====== -->
+<section id="tiers" class="tiers-section">
+<div class="container">
+<div class="tiers-header">
+<h2>Niveis de Comissao</h2>
+<p>Quanto mais voce vende, mais voce ganha. Evolua de nivel automaticamente conforme seu volume.</p>
+</div>
+<div class="tiers-grid">
+<div class="tier-card">
+<div class="tier-medal medal-bronze"><i class="fas fa-medal"></i></div>
+<h3>Bronze</h3>
+<div class="tier-pct">50<span>%</span></div>
+<div class="tier-sub">Comissao inicial para novos afiliados</div>
+<ul class="tier-features">
+<li><i class="fas fa-check"></i> Landing page personalizada</li>
+<li><i class="fas fa-check"></i> Link de afiliado unico</li>
+<li><i class="fas fa-check"></i> Catalogo completo de produtos</li>
+<li><i class="fas fa-check"></i> Dashboard de vendas</li>
+<li><i class="fas fa-check"></i> Materiais de divulgacao</li>
+<li><i class="fas fa-check"></i> Suporte por email</li>
+</ul>
+<a href="#" class="btn btn-outline">Comecar Gratis</a>
+</div>
+<div class="tier-card">
+<div class="tier-medal medal-silver"><i class="fas fa-medal"></i></div>
+<h3>Prata</h3>
+<div class="tier-pct">60<span>%</span></div>
+<div class="tier-sub">Desbloqueado por volume de vendas</div>
+<ul class="tier-features">
+<li><i class="fas fa-check"></i> Tudo do Bronze</li>
+<li><i class="fas fa-check"></i> Selo de verificado</li>
+<li><i class="fas fa-check"></i> Criativos exclusivos</li>
+<li><i class="fas fa-check"></i> Suporte prioritario</li>
+<li><i class="fas fa-check"></i> Relatorios avancados</li>
+<li><i class="fas fa-check"></i> Saques semanais</li>
+</ul>
+<a href="#" class="btn btn-outline">Evoluir para Prata</a>
+</div>
+<div class="tier-card t-featured">
+<div class="tier-medal medal-gold"><i class="fas fa-crown"></i></div>
+<h3>Ouro</h3>
+<div class="tier-pct">70<span>%</span></div>
+<div class="tier-sub">Top performers do ecossistema</div>
+<ul class="tier-features">
+<li><i class="fas fa-check"></i> Tudo do Prata</li>
+<li><i class="fas fa-check"></i> Comissao maxima de 70%</li>
+<li><i class="fas fa-check"></i> Pagina destacada no marketplace</li>
+<li><i class="fas fa-check"></i> Acesso a produtos exclusivos</li>
+<li><i class="fas fa-check"></i> Consultoria estrategica</li>
+<li><i class="fas fa-check"></i> Saques diarios</li>
+</ul>
+<a href="#" class="btn btn-green">Alcancar Ouro</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ====== CTA ====== -->
+<section class="cta">
+<div class="container">
+<h2>Pronto para faturar com o<br><span class="green">mercado financeiro?</span></h2>
+<p>Cadastre-se gratuitamente, escolha seus produtos e comece a receber comissoes hoje mesmo.</p>
+<div class="cta-flex">
+<a href="#" class="btn btn-green btn-xl"><i class="fas fa-rocket"></i> Criar Minha Conta Gratis</a>
+<a href="#" class="btn btn-outline btn-lg"><i class="fab fa-whatsapp"></i> Falar com Equipe</a>
+</div>
+<div class="cta-trust">
+<div class="cta-trust-item"><i class="fas fa-shield-halved"></i> Grupo Barsi Investimentos</div>
+<div class="cta-trust-item"><i class="fas fa-building-columns"></i> Parceiro XP Inc.</div>
+<div class="cta-trust-item"><i class="fas fa-clock"></i> 50 anos no mercado</div>
+<div class="cta-trust-item"><i class="fas fa-credit-card"></i> Pagamentos garantidos</div>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="container">
+<div class="footer-inner">
+<p>&copy; 2026 Barsi Bull Trader — Grupo Barsi Investimentos. Todos os direitos reservados.</p>
+<div class="footer-links">
+<a href="barsi-bull-trader.html">Home</a>
+<a href="#">Termos</a>
+<a href="#">Privacidade</a>
+<a href="#">Contato</a>
+</div>
+</div>
+</div>
+</footer>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting){el.target.style.opacity='1';el.target.style.transform='translateY(0)'}})},{threshold:.1});
+document.querySelectorAll('.how-step,.pt-card,.tier-card,.dash-kpi').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(15px)';el.style.transition='opacity .5s ease,transform .5s ease';obs.observe(el)});
+</script>
+</body>
+</html>

@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barsi Bull Trader — Ecossistema do Trader Profissional</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* ── BRAND COLORS ── */
+  --green:#6BFF06;
+  --green-dim:rgba(107,255,6,.12);
+  --green-border:rgba(107,255,6,.18);
+  --green-glow:rgba(107,255,6,.08);
+  --green-bright:#7FFF1A;
+
+  /* ── NEUTRALS ── */
+  --bg:#080A06;
+  --bg2:#0C0F09;
+  --card:#111408;
+  --card2:#161A0C;
+  --card-hover:#1B2110;
+
+  /* ── TEXT ── */
+  --text:#F5F5F0;
+  --text-sec:#8A9080;
+  --text-muted:#505848;
+
+  /* ── SIGNALS ── */
+  --red:#FF4545;
+  --yellow:#FFC300;
+
+  /* ── STRUCTURE ── */
+  --border:#1C2014;
+  --border2:#222816;
+  --radius:10px;
+  --radius-lg:16px;
+  --mono:'JetBrains Mono',monospace;
+  --shadow:0 32px 64px rgba(0,0,0,.5);
+}
+
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* ══════════════════════════════
+   CANDLESTICK CANVAS BG
+══════════════════════════════ */
+#candle-canvas{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;opacity:.18;
+}
+
+/* ══════════════════════════════
+   FIBONACCI RULER — lateral direita
+   medindo toda a altura do documento
+══════════════════════════════ */
+
+/* Trilho vertical fixo na direita */
+#fib-rail{
+  position:fixed;right:0;top:0;bottom:0;
+  width:2px;z-index:5;pointer-events:none;
+  background:linear-gradient(
+    to bottom,
+    rgba(255,195,0,.5)   0%,
+    rgba(107,255,6,.25)  38.2%,
+    rgba(255,195,0,.6)   50%,
+    rgba(107,255,6,.9)   62%,
+    rgba(107,255,6,.5)   70.5%,
+    rgba(107,255,6,.3)   79%,
+    rgba(255,195,0,.5)   100%
+  );
+}
+
+/* Cada marcador: linha + label */
+.fib-mark{
+  position:fixed;
+  right:0;left:0;
+  height:0;
+  pointer-events:none;
+  z-index:6;
+}
+/* Linha horizontal da largura total */
+.fib-mark::before{
+  content:'';
+  position:absolute;
+  left:0;right:56px;top:0;
+  height:1px;
+}
+/* Label na borda direita */
+.fib-mark::after{
+  content:attr(data-label);
+  position:absolute;
+  right:6px;top:-9px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.48rem;font-weight:700;
+  letter-spacing:.6px;
+  padding:1px 5px;border-radius:2px;
+  white-space:nowrap;
+}
+
+/* Nível 0% — ouro */
+.fib-mark[data-pct="0"]{top:0}
+.fib-mark[data-pct="0"]::before{background:rgba(255,195,0,.45)}
+.fib-mark[data-pct="0"]::after{color:#FFC300;background:rgba(255,195,0,.1)}
+
+/* Nível 38.2% — verde */
+.fib-mark[data-pct="38.2"]{top:38.2%}
+.fib-mark[data-pct="38.2"]::before{background:rgba(107,255,6,.5)}
+.fib-mark[data-pct="38.2"]::after{color:#6BFF06;background:rgba(107,255,6,.1)}
+
+/* Nível 50% — ouro */
+.fib-mark[data-pct="50"]{top:50%}
+.fib-mark[data-pct="50"]::before{background:rgba(255,195,0,.65)}
+.fib-mark[data-pct="50"]::after{color:#FFC300;background:rgba(255,195,0,.13)}
+
+/* Nível 62% — verde forte (áureo) */
+.fib-mark[data-pct="62"]{top:62%}
+.fib-mark[data-pct="62"]::before{background:rgba(107,255,6,.85);box-shadow:0 0 6px rgba(107,255,6,.3)}
+.fib-mark[data-pct="62"]::after{color:#6BFF06;background:rgba(107,255,6,.16);font-size:.52rem}
+
+/* Nível 70.5% — verde médio */
+.fib-mark[data-pct="70.5"]{top:70.5%}
+.fib-mark[data-pct="70.5"]::before{background:rgba(107,255,6,.45)}
+.fib-mark[data-pct="70.5"]::after{color:#6BFF06;background:rgba(107,255,6,.08)}
+
+/* Nível 79% — verde suave */
+.fib-mark[data-pct="79"]{top:79%}
+.fib-mark[data-pct="79"]::before{background:rgba(107,255,6,.35)}
+.fib-mark[data-pct="79"]::after{color:#6BFF06;background:rgba(107,255,6,.07)}
+
+/* Nível 100% — ouro */
+.fib-mark[data-pct="100"]{top:calc(100% - 1px)}
+.fib-mark[data-pct="100"]::before{background:rgba(255,195,0,.45)}
+.fib-mark[data-pct="100"]::after{color:#FFC300;background:rgba(255,195,0,.1)}
+
+/* ── SCANLINE GRID BG ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(107,255,6,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(107,255,6,.018) 1px,transparent 1px),
+    linear-gradient(rgba(107,255,6,.008) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(107,255,6,.008) 1px,transparent 1px);
+  background-size:200px 200px,200px 200px,40px 40px,40px 40px;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(107,255,6,.04) 0%,transparent 55%);
+}
+
+a{text-decoration:none;color:inherit;transition:.25s}
+img{max-width:100%;display:block}
+section,.topbar,footer,.ticker-wrap{position:relative;z-index:1}
+.container{max-width:1200px;margin:0 auto;padding:0 28px}
+
+/* ══════════════════════════════
+   TOPBAR
+══════════════════════════════ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(8,10,6,.88);
+  backdrop-filter:blur(24px) saturate(150%);
+  border-bottom:1px solid var(--border2);
+  padding:0 28px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+}
+.topbar-inner{max-width:1200px;width:100%;display:flex;align-items:center;justify-content:space-between}
+.logo-text{
+  font-weight:900;font-size:1.05rem;letter-spacing:-.02em;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.logo-text span{color:var(--green)}
+.logo-bull{
+  width:32px;height:32px;background:var(--green);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#0a0c07;font-weight:900;
+}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text-sec);font-size:.78rem;font-weight:500;letter-spacing:.3px;transition:.25s}
+.nav a:hover{color:var(--green)}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:6px;
+  font-weight:700;font-size:.78rem;cursor:pointer;
+  border:none;transition:.25s;letter-spacing:.3px;
+}
+.btn-green{background:var(--green);color:#080A06}
+.btn-green:hover{background:var(--green-bright);transform:translateY(-1px);box-shadow:0 6px 24px rgba(107,255,6,.3)}
+.btn-outline{border:1px solid var(--border2);background:transparent;color:var(--text-sec)}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-lg{padding:14px 32px;font-size:.86rem}
+.btn-ghost{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.btn-ghost:hover{background:rgba(107,255,6,.18)}
+.menu-toggle{
+  display:none;width:36px;height:36px;align-items:center;justify-content:center;
+  background:var(--card);border:1px solid var(--border2);border-radius:6px;
+  cursor:pointer;color:var(--text-sec);font-size:1rem;
+}
+
+/* ══════════════════════════════
+   TICKER
+══════════════════════════════ */
+.ticker-wrap{
+  background:var(--card);border-bottom:1px solid var(--border2);
+  overflow:hidden;height:38px;display:flex;align-items:center;margin-top:64px;
+}
+.ticker{display:flex;animation:ticker 70s linear infinite;white-space:nowrap}
+.ticker-item{
+  display:flex;align-items:center;gap:10px;padding:0 36px;
+  font-size:.72rem;color:var(--text-sec);flex-shrink:0;
+}
+.ticker-item .author{color:var(--green);font-weight:600}
+.ticker-item .sep{color:var(--green);opacity:.3}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+.hero{padding:96px 0 80px;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-240px;left:50%;transform:translateX(-50%);
+  width:900px;height:900px;
+  background:radial-gradient(circle,rgba(107,255,6,.05) 0%,transparent 50%);
+  pointer-events:none;
+}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green-dim);border:1px solid var(--green-border);
+  border-radius:4px;padding:6px 14px;
+  font-size:.68rem;color:var(--green);font-weight:600;
+  margin-bottom:22px;font-family:var(--mono);letter-spacing:.5px;
+}
+.hero-badge i{font-size:.6rem}
+
+.hero h1{
+  font-size:3.4rem;font-weight:900;line-height:1.06;
+  margin-bottom:18px;letter-spacing:-.04em;
+}
+.hero h1 .green{color:var(--green)}
+
+.hero-sub{
+  font-size:.96rem;color:var(--text-sec);
+  margin-bottom:32px;max-width:480px;line-height:1.75;
+}
+.hero-ctas{display:flex;gap:12px;margin-bottom:44px;flex-wrap:wrap}
+
+.hero-stats{display:flex;gap:0}
+.hero-stat{
+  flex:1;text-align:left;padding:18px 20px;
+  border-top:1px solid var(--border2);
+  border-right:1px solid var(--border2);
+}
+.hero-stat:last-child{border-right:0}
+.hero-stat .num{
+  font-size:1.9rem;font-weight:900;color:var(--green);
+  font-family:var(--mono);line-height:1;margin-bottom:4px;
+}
+.hero-stat .label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* ── TERMINAL MOCK ── */
+.hero-terminal{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  box-shadow:var(--shadow),0 0 0 1px rgba(107,255,6,.04);
+}
+.terminal-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 16px;background:var(--bg);
+  border-bottom:1px solid var(--border2);
+}
+.terminal-dot{width:9px;height:9px;border-radius:50%}
+.terminal-dot.r{background:#FF4545}
+.terminal-dot.y{background:#F5C400}
+.terminal-dot.g{background:var(--green)}
+.terminal-title{font-size:.63rem;color:var(--text-muted);margin-left:8px;font-family:var(--mono);letter-spacing:.5px}
+.terminal-body{padding:20px}
+.terminal-chart{
+  width:100%;height:155px;margin:0 0 16px;
+  position:relative;overflow:hidden;border-radius:6px;
+  background:rgba(107,255,6,.02);border:1px solid var(--border2);
+}
+.terminal-chart svg{width:100%;height:100%}
+.terminal-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.terminal-mini{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:12px;
+}
+.terminal-mini .tm-label{
+  font-size:.58rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);margin-bottom:4px;
+}
+.terminal-mini .tm-value{font-size:1rem;font-weight:700;font-family:var(--mono)}
+.terminal-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);
+}
+.terminal-row:last-child{border:0}
+.t-label{font-size:.72rem;color:var(--text-sec);font-family:var(--mono)}
+.t-value{font-size:.78rem;font-weight:700;font-family:var(--mono)}
+.t-value.up{color:var(--green)}
+.t-value.down{color:var(--red)}
+.t-value.neutral{color:var(--text)}
+
+/* ══════════════════════════════
+   MARKET STRIP
+══════════════════════════════ */
+.market-strip{
+  padding:14px 0;
+  border-top:1px solid var(--border2);
+  border-bottom:1px solid var(--border2);
+  overflow:hidden;background:var(--bg2);
+}
+.market-scroll{display:flex;animation:marketScroll 35s linear infinite;gap:0}
+.market-item{
+  display:flex;align-items:center;gap:12px;
+  padding:0 24px;border-right:1px solid var(--border2);flex-shrink:0;
+}
+.m-name{font-size:.68rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
+.m-price{font-size:.82rem;font-weight:700;font-family:var(--mono);color:var(--text)}
+.m-change{font-size:.68rem;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:3px}
+.m-change.up{color:var(--green);background:var(--green-dim)}
+.m-change.down{color:var(--red);background:rgba(255,69,69,.1)}
+@keyframes marketScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ══════════════════════════════
+   SECTION BASE
+══════════════════════════════ */
+section{padding:100px 0}
+.section-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.63rem;text-transform:uppercase;
+  letter-spacing:3px;color:var(--green);font-weight:700;
+  margin-bottom:12px;font-family:var(--mono);
+}
+.section-label::before{content:'';width:14px;height:1px;background:var(--green)}
+.section-title{font-size:2.4rem;font-weight:900;margin-bottom:14px;letter-spacing:-.03em}
+.section-sub{color:var(--text-sec);font-size:.94rem;max-width:540px;line-height:1.75}
+.section-header{text-align:center;margin-bottom:60px}
+.section-header .section-sub{margin:0 auto}
+
+/* ══════════════════════════════
+   ECOSYSTEM CARDS
+══════════════════════════════ */
+.eco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.eco-card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:28px;
+  transition:.35s;position:relative;overflow:hidden;
+}
+.eco-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  opacity:0;transition:.35s;
+}
+.eco-card:hover{
+  border-color:var(--green-border);
+  transform:translateY(-4px);
+  box-shadow:0 20px 50px rgba(0,0,0,.35),0 0 0 1px rgba(107,255,6,.06);
+}
+.eco-card:hover::before{opacity:1}
+.eco-card>*{position:relative;z-index:1}
+.eco-num{
+  font-size:.58rem;color:var(--green);font-weight:700;
+  letter-spacing:3px;margin-bottom:16px;font-family:var(--mono);
+}
+.eco-icon{
+  width:44px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;margin-bottom:16px;
+  background:var(--green-dim);color:var(--green);
+  border:1px solid var(--green-border);
+}
+.eco-card h3{font-size:1rem;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+.eco-card p{font-size:.8rem;color:var(--text-sec);line-height:1.65}
+.eco-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:16px}
+.eco-tag{
+  font-size:.58rem;padding:3px 9px;border-radius:3px;
+  background:rgba(107,255,6,.05);color:var(--green);
+  font-family:var(--mono);letter-spacing:.3px;
+  border:1px solid rgba(107,255,6,.1);
+}
+
+/* ══════════════════════════════
+   TRADE DIARY
+══════════════════════════════ */
+.diary{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);overflow:hidden;
+}
+.diary-grid{display:grid;grid-template-columns:1fr 1fr;min-height:480px}
+.diary-content{padding:52px;display:flex;flex-direction:column;justify-content:center}
+.diary-content h2{font-size:2.1rem;font-weight:900;margin-bottom:14px;letter-spacing:-.03em}
+.diary-content h2 .green{color:var(--green)}
+.diary-content>p{color:var(--text-sec);margin-bottom:24px;line-height:1.75;font-size:.88rem}
+.diary-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.diary-step{display:flex;gap:14px;align-items:flex-start}
+.diary-step-num{
+  width:32px;height:32px;border-radius:6px;flex-shrink:0;
+  background:var(--green-dim);color:var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.72rem;font-family:var(--mono);
+  border:1px solid var(--green-border);
+}
+.diary-step-text{font-size:.8rem;color:var(--text-sec);line-height:1.55;padding-top:4px}
+.diary-step-text strong{color:var(--text)}
+.diary-visual{
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:40px;border-left:1px solid var(--border2);
+}
+.diary-mock{width:100%;max-width:360px}
+.dm-header{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:10px 10px 0 0;padding:14px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.dm-title{font-weight:700;font-size:.78rem;display:flex;align-items:center;gap:8px}
+.dm-title i{color:var(--green)}
+.dm-date{font-size:.63rem;color:var(--text-muted);font-family:var(--mono)}
+.dm-body{
+  background:var(--card2);border:1px solid var(--border2);
+  border-top:0;padding:14px 18px;
+}
+.dm-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);
+}
+.dm-row:last-child{border:0}
+.dm-row .dl{font-size:.68rem;color:var(--text-sec);font-family:var(--mono)}
+.dm-row .dv{font-weight:700;font-size:.78rem;font-family:var(--mono)}
+.dm-row .dv.up{color:var(--green)}
+.dm-row .dv.warn{color:var(--yellow)}
+.dm-rec{
+  background:var(--green-dim);
+  border:1px solid var(--green-border);
+  border-top:0;border-radius:0 0 10px 10px;padding:14px 18px;
+}
+.dm-rec p{font-size:.68rem;color:var(--green);line-height:1.6;font-family:var(--mono)}
+.dm-rec strong{font-weight:800}
+
+/* ══════════════════════════════
+   PRODUCTS
+══════════════════════════════ */
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.product-card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:32px;transition:.3s;position:relative;
+}
+.product-card:hover{border-color:var(--green-border);transform:translateY(-2px)}
+.product-tag{
+  font-size:.58rem;text-transform:uppercase;letter-spacing:2px;font-weight:700;
+  margin-bottom:12px;display:inline-block;padding:3px 10px;border-radius:3px;
+  background:var(--green-dim);color:var(--green);font-family:var(--mono);
+  border:1px solid var(--green-border);
+}
+.product-card h3{font-size:1rem;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+.product-card p{font-size:.8rem;color:var(--text-sec);line-height:1.65;margin-bottom:16px}
+.product-features{display:flex;flex-wrap:wrap;gap:6px}
+.pf{
+  font-size:.63rem;padding:4px 10px;border-radius:3px;
+  background:var(--bg);border:1px solid var(--border2);
+  color:var(--text-sec);font-family:var(--mono);
+}
+
+/* ══════════════════════════════
+   ACADEMY
+══════════════════════════════ */
+.academy-section{background:var(--bg2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+.academy-category{margin-bottom:40px}
+.academy-category:last-child{margin-bottom:0}
+.category-title{font-size:.84rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.category-title i{color:var(--green);font-size:.7rem}
+.academy-row{
+  display:flex;gap:14px;overflow-x:auto;
+  padding-bottom:8px;-webkit-overflow-scrolling:touch;
+}
+.academy-row::-webkit-scrollbar{height:3px}
+.academy-row::-webkit-scrollbar-track{background:var(--card)}
+.academy-row::-webkit-scrollbar-thumb{background:var(--green);border-radius:3px}
+.course-card{
+  min-width:230px;background:var(--card);
+  border:1px solid var(--border2);border-radius:8px;
+  overflow:hidden;transition:.35s;flex-shrink:0;cursor:pointer;
+}
+.course-card:hover{
+  border-color:var(--green-border);
+  transform:scale(1.03);box-shadow:0 16px 40px rgba(0,0,0,.4);
+}
+.course-thumb{height:130px;position:relative;overflow:hidden}
+.course-thumb.t1{background:linear-gradient(135deg,#0a1208,#0d2210)}
+.course-thumb.t2{background:linear-gradient(135deg,#0f1a10,#1a2a12)}
+.course-thumb.t3{background:linear-gradient(135deg,#14180a,#1a2808)}
+.course-thumb.t4{background:linear-gradient(135deg,#0d1208,#0d1a0c)}
+.course-thumb.t5{background:linear-gradient(135deg,#0a1208,#0d1c0a)}
+.course-thumb.t6{background:linear-gradient(135deg,#0e1a08,#161e0e)}
+.course-thumb.t7{background:linear-gradient(135deg,#0a120c,#101a08)}
+.course-thumb.t8{background:linear-gradient(135deg,#0e1408,#0a1a0e)}
+.play-btn{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:42px;height:42px;
+  background:rgba(107,255,6,.15);backdrop-filter:blur(8px);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--green);font-size:.85rem;
+  border:1px solid var(--green-border);transition:.3s;
+}
+.course-card:hover .play-btn{background:rgba(107,255,6,.35);transform:translate(-50%,-50%) scale(1.1)}
+.course-badge{
+  position:absolute;top:10px;left:10px;
+  font-size:.54rem;padding:3px 7px;border-radius:3px;
+  font-weight:800;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);
+}
+.badge-init{background:rgba(107,255,6,.18);color:var(--green)}
+.badge-inter{background:rgba(100,149,237,.2);color:#6495ED}
+.badge-adv{background:rgba(255,69,69,.18);color:var(--red)}
+.badge-all{background:rgba(255,255,255,.1);color:var(--text)}
+.course-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.05)}
+.course-progress-bar{height:100%;background:var(--green);border-radius:0 3px 3px 0}
+.course-body{padding:14px}
+.course-body h4{font-size:.78rem;font-weight:600;margin-bottom:6px;line-height:1.3}
+.course-meta{font-size:.63rem;color:var(--text-muted);display:flex;gap:10px;font-family:var(--mono)}
+.course-meta i{color:var(--green);margin-right:2px}
+.lock-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-muted)}
+
+/* ══════════════════════════════
+   AFFILIATE
+══════════════════════════════ */
+.aff-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden}
+.aff-grid{display:grid;grid-template-columns:1fr 1fr}
+.aff-content{padding:52px;display:flex;flex-direction:column;justify-content:center}
+.aff-content h2{font-size:2.1rem;font-weight:900;margin-bottom:14px;letter-spacing:-.03em}
+.aff-content h2 .green{color:var(--green)}
+.aff-content>p{color:var(--text-sec);margin-bottom:28px;line-height:1.75;font-size:.88rem}
+.tier{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;border-radius:8px;
+  background:var(--bg);border:1px solid var(--border2);
+  margin-bottom:10px;transition:.25s;
+}
+.tier:hover{border-color:var(--green-border)}
+.tier-icon{
+  width:36px;height:36px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.88rem;background:var(--green-dim);
+  color:var(--green);border:1px solid var(--green-border);
+}
+.tier-info{flex:1}
+.tier-name{font-weight:700;font-size:.84rem}
+.tier-desc{font-size:.63rem;color:var(--text-muted);margin-top:2px}
+.tier-pct{font-weight:900;font-size:1.1rem;color:var(--green);font-family:var(--mono)}
+.aff-visual{
+  background:var(--bg);display:flex;align-items:center;
+  justify-content:center;padding:40px;border-left:1px solid var(--border2);
+}
+.lp-mock{
+  width:100%;max-width:290px;background:var(--card);
+  border:1px solid var(--border2);border-radius:10px;overflow:hidden;
+}
+.lp-head{
+  padding:18px 20px;text-align:center;
+  border-bottom:1px solid var(--border2);
+  background:var(--green-dim);
+}
+.lp-head .lp-brand{
+  font-size:.58rem;color:var(--green);
+  text-transform:uppercase;letter-spacing:2px;
+  font-family:var(--mono);margin-bottom:6px;opacity:.7;
+}
+.lp-head h4{font-size:.88rem;font-weight:700}
+.lp-body{padding:14px}
+.lp-product{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:12px;margin-bottom:8px;
+}
+.lp-product .lp-name{font-size:.74rem;font-weight:600}
+.lp-product .lp-price{font-size:.63rem;color:var(--green);margin-top:2px;font-family:var(--mono)}
+.lp-cta{
+  width:100%;padding:10px;
+  background:var(--green);color:#080A06;
+  border:none;border-radius:6px;
+  font-weight:800;font-size:.78rem;cursor:pointer;margin-top:4px;
+}
+
+/* ══════════════════════════════
+   PRICING
+══════════════════════════════ */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.price-card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:36px 28px;
+  transition:.3s;position:relative;
+}
+.price-card:hover{transform:translateY(-3px)}
+.price-card.featured{
+  border-color:var(--green-border);
+  box-shadow:0 0 0 1px rgba(107,255,6,.08),0 40px 80px rgba(0,0,0,.3);
+  background:var(--card2);
+}
+.price-card.featured::before{
+  content:'MAIS POPULAR';
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#080A06;
+  padding:3px 16px;border-radius:3px;
+  font-size:.58rem;font-weight:900;letter-spacing:1.5px;font-family:var(--mono);
+}
+.plan-name{font-size:.58rem;text-transform:uppercase;letter-spacing:3px;color:var(--green);font-weight:700;margin-bottom:6px;font-family:var(--mono)}
+.price-card h3{font-size:1.3rem;font-weight:900;margin-bottom:4px;letter-spacing:-.02em}
+.price{font-size:2.1rem;font-weight:900;margin:16px 0 2px;font-family:var(--mono)}
+.price span{font-size:.78rem;font-weight:400;color:var(--text-sec)}
+.price-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:22px}
+.price-features{list-style:none;margin-bottom:28px}
+.price-features li{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:7px 0;font-size:.8rem;color:var(--text-sec);
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.price-features li:last-child{border:0}
+.price-features li i{margin-top:3px;font-size:.62rem}
+.price-features li i.fa-check{color:var(--green)}
+.price-features li i.fa-xmark{color:var(--text-muted)}
+.price-features li.off{opacity:.3}
+.price-card .btn{width:100%;justify-content:center}
+
+/* ══════════════════════════════
+   RESULTS STRIP
+══════════════════════════════ */
+.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border2)}
+.result-card{
+  background:var(--bg2);
+  padding:32px 24px;text-align:center;transition:.3s;
+}
+.result-card:hover{background:var(--card)}
+.r-value{
+  font-size:2.4rem;font-weight:900;color:var(--green);
+  font-family:var(--mono);line-height:1;margin-bottom:6px;
+}
+.r-label{font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* ══════════════════════════════
+   CTA SECTION
+══════════════════════════════ */
+.cta-section{
+  text-align:center;padding:120px 0;position:relative;overflow:hidden;
+  border-top:1px solid var(--border2);
+}
+.cta-section::before{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:700px;
+  background:radial-gradient(circle,rgba(107,255,6,.05) 0%,transparent 50%);
+  pointer-events:none;
+}
+.cta-section h2{font-size:2.8rem;font-weight:900;margin-bottom:16px;letter-spacing:-.04em;line-height:1.1}
+.cta-section h2 .green{color:var(--green)}
+.cta-section p{color:var(--text-sec);font-size:1rem;margin-bottom:36px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.7}
+.cta-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+footer{border-top:1px solid var(--border2);padding:56px 0 24px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:36px}
+.footer-brand{display:flex;flex-direction:column;gap:12px}
+.footer-brand-name{font-weight:900;font-size:.96rem;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.footer-brand-name span{color:var(--green)}
+.footer-brand p{color:var(--text-muted);font-size:.78rem;line-height:1.65;max-width:280px}
+.footer-col h4{
+  font-size:.58rem;text-transform:uppercase;
+  letter-spacing:2.5px;color:var(--green);
+  margin-bottom:14px;font-weight:700;font-family:var(--mono);
+}
+.footer-col a{display:block;color:var(--text-muted);font-size:.8rem;padding:4px 0;transition:.25s}
+.footer-col a:hover{color:var(--green)}
+.disclaimer{
+  background:rgba(255,69,69,.04);
+  border:1px solid rgba(255,69,69,.08);
+  border-radius:8px;padding:16px 20px;margin:28px 0;
+}
+.disclaimer p{font-size:.63rem;color:var(--text-muted);line-height:1.65}
+.disclaimer strong{color:var(--red)}
+.footer-bottom{
+  border-top:1px solid var(--border2);padding-top:20px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-bottom p{font-size:.63rem;color:var(--text-muted)}
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media(max-width:1024px){
+  .hero h1{font-size:2.6rem}
+  .hero-grid,.diary-grid,.aff-grid{grid-template-columns:1fr}
+  .eco-grid{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr}
+  .pricing-grid .price-card.featured{order:-1}
+  .products-grid{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .diary-visual,.aff-visual{border-left:0;border-top:1px solid var(--border2)}
+}
+@media(max-width:768px){
+  .nav{display:none}
+  .menu-toggle{display:flex}
+  .hero h1{font-size:1.9rem}
+  .hero-stats{flex-direction:column;gap:0}
+  .hero-stat{border-right:0}
+  .hero-ctas{flex-direction:column}
+  .eco-grid{grid-template-columns:1fr}
+  .section-title{font-size:1.8rem}
+  .cta-buttons{flex-direction:column;align-items:center}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:8px;text-align:center}
+  .results-grid{grid-template-columns:repeat(2,1fr)}
+  .diary-content,.aff-content{padding:28px}
+  .course-card{min-width:200px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ CANDLESTICK CANVAS ══ -->
+<canvas id="candle-canvas"></canvas>
+
+<!-- ══ FIBONACCI RULER — mede 100% da página ══ -->
+<div id="fib-rail"></div>
+<div class="fib-mark" data-pct="0"    data-label="0%"></div>
+<div class="fib-mark" data-pct="38.2" data-label="38.2%"></div>
+<div class="fib-mark" data-pct="50"   data-label="50%"></div>
+<div class="fib-mark" data-pct="62"   data-label="62% ✦"></div>
+<div class="fib-mark" data-pct="70.5" data-label="70.5%"></div>
+<div class="fib-mark" data-pct="79"   data-label="79%"></div>
+<div class="fib-mark" data-pct="100"  data-label="100%"></div>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo-text">
+      <div class="logo-bull">B</div>
+      Barsi Bull<span>Trader</span>
+    </div>
+    <nav class="nav">
+      <a href="#ecosystem">Ecossistema</a>
+      <a href="#products">Produtos</a>
+      <a href="#academy">Academy</a>
+      <a href="#affiliate">Afiliados</a>
+      <a href="#pricing">Planos</a>
+      <a href="#" class="btn btn-green">Acessar Plataforma</a>
+    </nav>
+    <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+  </div>
+</header>
+
+<!-- ══ TICKER DE FRASES ══ -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span class="sep">|</span><span>"O mercado e um dispositivo para transferir dinheiro dos impacientes para os pacientes."</span><span class="author">— Warren Buffett</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Nao e sobre estar certo ou errado, mas sobre quanto voce faz quando esta certo."</span><span class="author">— George Soros</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"O risco vem de nao saber o que voce esta fazendo."</span><span class="author">— Warren Buffett</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Proteja suas perdas e os lucros cuidarao de si mesmos."</span><span class="author">— Ed Seykota</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"A chave para o trading e disciplina e gerenciamento de risco."</span><span class="author">— Paul Tudor Jones</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Traders lucrativos nao preveem, eles reagem."</span><span class="author">— Mark Douglas</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Na calma e elegancia de sempre, o trader tartaruga vence a corrida no trade."</span><span class="author">— Barsi Bull Trader</span></div>
+    <!-- DUPLICATE FOR SEAMLESS LOOP -->
+    <div class="ticker-item"><span class="sep">|</span><span>"O mercado e um dispositivo para transferir dinheiro dos impacientes para os pacientes."</span><span class="author">— Warren Buffett</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Nao e sobre estar certo ou errado, mas sobre quanto voce faz quando esta certo."</span><span class="author">— George Soros</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"O risco vem de nao saber o que voce esta fazendo."</span><span class="author">— Warren Buffett</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Proteja suas perdas e os lucros cuidarao de si mesmos."</span><span class="author">— Ed Seykota</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"A chave para o trading e disciplina e gerenciamento de risco."</span><span class="author">— Paul Tudor Jones</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Traders lucrativos nao preveem, eles reagem."</span><span class="author">— Mark Douglas</span></div>
+    <div class="ticker-item"><span class="sep">|</span><span>"Na calma e elegancia de sempre, o trader tartaruga vence a corrida no trade."</span><span class="author">— Barsi Bull Trader</span></div>
+  </div>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-shield-halved"></i> BARSI INVESTIMENTOS // XP INC.</div>
+        <h1>Ecossistema do<br><span class="green">Trader Profissional</span></h1>
+        <p class="hero-sub">Tecnologia, estrategia e disciplina. Tudo que voce precisa para operar com consistencia, com o suporte do Grupo Barsi e a estrutura da XP.</p>
+        <div class="hero-ctas">
+          <a href="#pricing" class="btn btn-green btn-lg"><i class="fas fa-bolt"></i> Comecar Agora</a>
+          <a href="#ecosystem" class="btn btn-outline btn-lg"><i class="fas fa-play"></i> Ver Ecossistema</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">+50%</div><div class="label">Rentabilidade 2025</div></div>
+          <div class="hero-stat"><div class="num">50+</div><div class="label">Estrategias Ativas</div></div>
+          <div class="hero-stat"><div class="num">50</div><div class="label">Anos no Mercado</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot r"></div>
+            <div class="terminal-dot y"></div>
+            <div class="terminal-dot g"></div>
+            <span class="terminal-title">barsi_dashboard.exe — Mesa Operacional</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-chart">
+              <svg viewBox="0 0 500 155" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6BFF06" stop-opacity=".18"/>
+                    <stop offset="100%" stop-color="#6BFF06" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <line x1="0" y1="38" x2="500" y2="38" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="0" y1="77" x2="500" y2="77" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="0" y1="116" x2="500" y2="116" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="100" y1="0" x2="100" y2="155" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="200" y1="0" x2="200" y2="155" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="300" y1="0" x2="300" y2="155" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <line x1="400" y1="0" x2="400" y2="155" stroke="rgba(107,255,6,.05)" stroke-width="1"/>
+                <path d="M0,138 C30,132 50,126 80,116 C110,106 130,92 160,97 C190,102 210,82 240,67 C270,52 290,57 320,42 C350,28 370,32 400,22 C430,15 460,17 500,10 L500,155 L0,155 Z" fill="url(#chartGrad)"/>
+                <path d="M0,138 C30,132 50,126 80,116 C110,106 130,92 160,97 C190,102 210,82 240,67 C270,52 290,57 320,42 C350,28 370,32 400,22 C430,15 460,17 500,10" fill="none" stroke="#6BFF06" stroke-width="1.8"/>
+                <rect x="60" y="102" width="5" height="24" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="100" y="92" width="5" height="15" fill="#FF4545" rx="1" opacity=".8"/>
+                <rect x="140" y="85" width="5" height="19" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="180" y="75" width="5" height="17" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="220" y="62" width="5" height="13" fill="#FF4545" rx="1" opacity=".8"/>
+                <rect x="260" y="52" width="5" height="21" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="300" y="39" width="5" height="14" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="340" y="27" width="5" height="19" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="380" y="19" width="5" height="10" fill="#FF4545" rx="1" opacity=".8"/>
+                <rect x="420" y="12" width="5" height="17" fill="#6BFF06" rx="1" opacity=".8"/>
+                <rect x="460" y="7" width="5" height="14" fill="#6BFF06" rx="1" opacity=".8"/>
+              </svg>
+            </div>
+            <div class="terminal-mini-grid">
+              <div class="terminal-mini"><div class="tm-label">Resultado Dia</div><div class="tm-value" style="color:var(--green)">+R$ 4.850</div></div>
+              <div class="terminal-mini"><div class="tm-label">Traders</div><div class="tm-value">127</div></div>
+              <div class="terminal-mini"><div class="tm-label">Drawdown</div><div class="tm-value">3.2%</div></div>
+            </div>
+            <div class="terminal-row"><span class="t-label">WIN — Mini Indice</span><span class="t-value up">+1.240 pts</span></div>
+            <div class="terminal-row"><span class="t-label">WDO — Mini Dolar</span><span class="t-value up">+18,5 pts</span></div>
+            <div class="terminal-row"><span class="t-label">BTC Futuro</span><span class="t-value down">-0.8%</span></div>
+            <div class="terminal-row"><span class="t-label">Portfolio Bogota</span><span class="t-value up">+18.2%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MARKET STRIP ══ -->
+<div class="market-strip" style="position:relative;z-index:1">
+  <div class="market-scroll">
+    <div class="market-item"><span class="m-name">IBOV</span><span class="m-price">131.420</span><span class="m-change up">+1.24%</span></div>
+    <div class="market-item"><span class="m-name">WIN</span><span class="m-price">131.450</span><span class="m-change up">+820 pts</span></div>
+    <div class="market-item"><span class="m-name">WDO</span><span class="m-price">5.842</span><span class="m-change down">-12 pts</span></div>
+    <div class="market-item"><span class="m-name">BTC/USD</span><span class="m-price">87.420</span><span class="m-change up">+2.3%</span></div>
+    <div class="market-item"><span class="m-name">ETH/USD</span><span class="m-price">3.284</span><span class="m-change up">+1.8%</span></div>
+    <div class="market-item"><span class="m-name">SOL/USD</span><span class="m-price">148.60</span><span class="m-change down">-0.5%</span></div>
+    <div class="market-item"><span class="m-name">OURO</span><span class="m-price">2.184</span><span class="m-change up">+0.4%</span></div>
+    <div class="market-item"><span class="m-name">S&amp;P 500</span><span class="m-price">5.667</span><span class="m-change up">+0.8%</span></div>
+    <div class="market-item"><span class="m-name">PETR4</span><span class="m-price">38.42</span><span class="m-change up">+1.1%</span></div>
+    <div class="market-item"><span class="m-name">VALE3</span><span class="m-price">61.80</span><span class="m-change down">-0.3%</span></div>
+    <!-- DUPLICATE -->
+    <div class="market-item"><span class="m-name">IBOV</span><span class="m-price">131.420</span><span class="m-change up">+1.24%</span></div>
+    <div class="market-item"><span class="m-name">WIN</span><span class="m-price">131.450</span><span class="m-change up">+820 pts</span></div>
+    <div class="market-item"><span class="m-name">WDO</span><span class="m-price">5.842</span><span class="m-change down">-12 pts</span></div>
+    <div class="market-item"><span class="m-name">BTC/USD</span><span class="m-price">87.420</span><span class="m-change up">+2.3%</span></div>
+    <div class="market-item"><span class="m-name">ETH/USD</span><span class="m-price">3.284</span><span class="m-change up">+1.8%</span></div>
+    <div class="market-item"><span class="m-name">SOL/USD</span><span class="m-price">148.60</span><span class="m-change down">-0.5%</span></div>
+    <div class="market-item"><span class="m-name">OURO</span><span class="m-price">2.184</span><span class="m-change up">+0.4%</span></div>
+    <div class="market-item"><span class="m-name">S&amp;P 500</span><span class="m-price">5.667</span><span class="m-change up">+0.8%</span></div>
+    <div class="market-item"><span class="m-name">PETR4</span><span class="m-price">38.42</span><span class="m-change up">+1.1%</span></div>
+    <div class="market-item"><span class="m-name">VALE3</span><span class="m-price">61.80</span><span class="m-change down">-0.3%</span></div>
+  </div>
+</div>
+
+<!-- ══ ECOSYSTEM ══ -->
+<section id="ecosystem">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Ecossistema</div>
+      <h2 class="section-title">6 Pilares do Trader Profissional</h2>
+      <p class="section-sub">Tecnologia, estrategia e disciplina. Um ecossistema completo para transformar sua operacao no mercado.</p>
+    </div>
+    <div class="eco-grid">
+      <div class="eco-card">
+        <div class="eco-num">01 // JORNADA</div>
+        <div class="eco-icon"><i class="fas fa-graduation-cap"></i></div>
+        <h3>Jornada do Trader</h3>
+        <p>Do simulador a conta real. Qualificacao avancada, controle emocional e rotina disciplinada com acompanhamento completo.</p>
+        <div class="eco-tags"><span class="eco-tag">Aulas Online</span><span class="eco-tag">Encontros Semanais</span><span class="eco-tag">Suporte</span></div>
+      </div>
+      <div class="eco-card">
+        <div class="eco-num">02 // ANALISE</div>
+        <div class="eco-icon"><i class="fas fa-microphone"></i></div>
+        <h3>Morning Call</h3>
+        <p>Analise ao vivo todos os dias. Leitura de mercado, direcionamento diario e cenarios para voce operar com clareza.</p>
+        <div class="eco-tags"><span class="eco-tag">Live Diaria</span><span class="eco-tag">Mercado</span><span class="eco-tag">Cenarios</span></div>
+      </div>
+      <div class="eco-card">
+        <div class="eco-num">03 // ESTRATEGIA</div>
+        <div class="eco-icon"><i class="fas fa-crosshairs"></i></div>
+        <h3>Golden Points</h3>
+        <p>Pontos de volatilidade, regioes institucionais e operacional validado pela mesa para maximizar suas entradas.</p>
+        <div class="eco-tags"><span class="eco-tag">Volatilidade</span><span class="eco-tag">Institucional</span><span class="eco-tag">Validado</span></div>
+      </div>
+      <div class="eco-card">
+        <div class="eco-num">04 // GESTAO</div>
+        <div class="eco-icon"><i class="fas fa-chart-pie"></i></div>
+        <h3>Acompanhamento Trader</h3>
+        <p>Gestao de risco e metas financeiras. Supervisao estrategica, alertas inteligentes e rotina operacional personalizada.</p>
+        <div class="eco-tags"><span class="eco-tag">Risco</span><span class="eco-tag">Metas</span><span class="eco-tag">Alertas</span></div>
+      </div>
+      <div class="eco-card">
+        <div class="eco-num">05 // TECNOLOGIA</div>
+        <div class="eco-icon"><i class="fas fa-robot"></i></div>
+        <h3>Automacoes &amp; Copy Trade</h3>
+        <p>50+ estrategias automatizadas direto na XP. Execucao sem interferencia emocional. Escala operacional real.</p>
+        <div class="eco-tags"><span class="eco-tag">50+ Bots</span><span class="eco-tag">Copy</span><span class="eco-tag">XP</span></div>
+      </div>
+      <div class="eco-card">
+        <div class="eco-num">06 // COMUNIDADE</div>
+        <div class="eco-icon"><i class="fas fa-trophy"></i></div>
+        <h3>Campeonatos de Trade</h3>
+        <p>Competicoes mensais com premios reais via RocketTrader. Performance, gamificacao e comunidade ativa.</p>
+        <div class="eco-tags"><span class="eco-tag">R$20mil</span><span class="eco-tag">Ranking</span><span class="eco-tag">Premios</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TRADE DIARY ══ -->
+<section id="diary" style="padding-top:0">
+  <div class="container">
+    <div class="diary">
+      <div class="diary-grid">
+        <div class="diary-content">
+          <div class="section-label">Exclusivo</div>
+          <h2>Diario de Trade <span class="green">Inteligente</span></h2>
+          <p>Preencha seu resultado em 30 segundos. A plataforma calcula automaticamente seu plano operacional para o dia seguinte.</p>
+          <div class="diary-steps">
+            <div class="diary-step">
+              <div class="diary-step-num">01</div>
+              <div class="diary-step-text"><strong>Defina sua meta mensal</strong> — Capital e objetivo financeiro.</div>
+            </div>
+            <div class="diary-step">
+              <div class="diary-step-num">02</div>
+              <div class="diary-step-text"><strong>Preencha o diario</strong> — Resultado, operacoes e ativo. 3 campos.</div>
+            </div>
+            <div class="diary-step">
+              <div class="diary-step-num">03</div>
+              <div class="diary-step-text"><strong>Receba o plano</strong> — Contratos, stop e meta diaria calculados.</div>
+            </div>
+            <div class="diary-step">
+              <div class="diary-step-num">04</div>
+              <div class="diary-step-text"><strong>Desbloqueie metas</strong> — Meta 1 → Meta 2 → acompanhamento premium.</div>
+            </div>
+          </div>
+          <a href="#pricing" class="btn btn-green"><i class="fas fa-arrow-right"></i> Comecar</a>
+        </div>
+        <div class="diary-visual">
+          <div class="diary-mock">
+            <div class="dm-header">
+              <span class="dm-title"><i class="fas fa-book-open"></i> Diario de Trade</span>
+              <span class="dm-date">15/03/2026</span>
+            </div>
+            <div class="dm-body">
+              <div class="dm-row"><span class="dl">RESULTADO_DIA</span><span class="dv up">+R$ 1.250,00</span></div>
+              <div class="dm-row"><span class="dl">OPERACOES</span><span class="dv">4</span></div>
+              <div class="dm-row"><span class="dl">ATIVO</span><span class="dv">WIN</span></div>
+              <div class="dm-row"><span class="dl">META_MENSAL</span><span class="dv warn">68%</span></div>
+              <div class="dm-row"><span class="dl">DIA_UTIL</span><span class="dv">12/22</span></div>
+            </div>
+            <div class="dm-rec">
+              <p><strong>→ RECOMENDACAO_AMANHA:</strong><br>5 minicontratos | stop: 350 pts<br>meta_diaria: R$ 625,00<br>status: ON_TRACK_META_1</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRODUCTS ══ -->
+<section id="products">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Produtos</div>
+      <h2 class="section-title">Produtos do Ecossistema</h2>
+      <p class="section-sub">Produtos autorais e curados para cada etapa da sua jornada como trader e investidor.</p>
+    </div>
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-tag">Automacao</div>
+        <h3>Estrategias Automatizadas</h3>
+        <p>50+ estrategias 100% automaticas direto na XP. Baseadas em regras e algoritmos validados por especialistas.</p>
+        <div class="product-features"><span class="pf">Mini Indice</span><span class="pf">Mini Dolar</span><span class="pf">Bitcoin</span><span class="pf">Ethereum</span><span class="pf">Ouro</span><span class="pf">Solana</span></div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag">Educacional</div>
+        <h3>Jornada do Trader — Curso Completo</h3>
+        <p>Analise tecnica, gerenciamento de risco, psicologia do trader, simulacao e avaliacao com suporte diario.</p>
+        <div class="product-features"><span class="pf">Teoria + Pratica</span><span class="pf">Suporte</span><span class="pf">Certificado</span></div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag">Digital</div>
+        <h3>Indicadores Tecnicos &amp; E-books</h3>
+        <p>Indicadores proprietarios e e-books com estrategias testadas pela mesa operacional Barsi.</p>
+        <div class="product-features"><span class="pf">Indicadores</span><span class="pf">E-books</span><span class="pf">Planilhas</span><span class="pf">Templates</span></div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag">Loja</div>
+        <h3>Merchandise &amp; Acessorios</h3>
+        <p>Touro de mesa, moedas decorativas de Bitcoin, roupas com frases do mercado financeiro e acessorios exclusivos.</p>
+        <div class="product-features"><span class="pf">Touro</span><span class="pf">Moeda BTC</span><span class="pf">Roupas</span><span class="pf">Acessorios</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ACADEMY ══ -->
+<section id="academy" class="academy-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Academy</div>
+      <h2 class="section-title">Barsi Academy</h2>
+      <p class="section-sub">Aprenda no seu ritmo. Conteudos desbloqueados conforme voce evolui e completa missoes.</p>
+    </div>
+    <div class="academy-category">
+      <div class="category-title"><i class="fas fa-fire"></i> Em Alta</div>
+      <div class="academy-row">
+        <div class="course-card"><div class="course-thumb t1"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-init">Iniciante</span><div class="course-progress"><div class="course-progress-bar" style="width:75%"></div></div></div><div class="course-body"><h4>Fundamentos do Day Trade</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 12h</span><span><i class="fas fa-play-circle"></i> 24 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t2"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-inter">Intermediario</span><div class="course-progress"><div class="course-progress-bar" style="width:40%"></div></div></div><div class="course-body"><h4>Analise Tecnica Avancada</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 18h</span><span><i class="fas fa-play-circle"></i> 32 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t3"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-adv">Avancado</span></div><div class="course-body"><h4>Psicologia do Trader</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 8h</span><span><i class="fas fa-play-circle"></i> 16 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t4"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-all">Todos</span></div><div class="course-body"><h4>Gestao de Risco na Pratica</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 10h</span><span><i class="fas fa-play-circle"></i> 20 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t5"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-adv">Avancado</span></div><div class="course-body"><h4>Automacoes &amp; Algoritmos</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 14h</span><span><i class="fas fa-play-circle"></i> 28 aulas</span></div></div></div>
+      </div>
+    </div>
+    <div class="academy-category">
+      <div class="category-title"><i class="fas fa-chart-line"></i> Operacional</div>
+      <div class="academy-row">
+        <div class="course-card"><div class="course-thumb t6"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-inter">Intermediario</span></div><div class="course-body"><h4>Leitura de Fluxo de Ordens</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 6h</span><span><i class="fas fa-play-circle"></i> 12 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t7"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-init">Iniciante</span></div><div class="course-body"><h4>Imposto de Renda no Day Trade</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 4h</span><span><i class="fas fa-play-circle"></i> 8 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t8"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-adv">Avancado</span></div><div class="course-body"><h4>Estrategias com Contratos Futuros</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 16h</span><span><i class="fas fa-play-circle"></i> 30 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t1"><div class="play-btn"><i class="fas fa-play"></i></div><span class="course-badge badge-all">Todos</span></div><div class="course-body"><h4>Controle Emocional</h4><div class="course-meta"><span><i class="fas fa-clock"></i> 5h</span><span><i class="fas fa-play-circle"></i> 10 aulas</span></div></div></div>
+        <div class="course-card"><div class="course-thumb t4"><div class="play-btn"><i class="fas fa-lock"></i></div><span class="course-badge badge-adv">Avancado</span><div class="lock-overlay"><i class="fas fa-lock"></i></div></div><div class="course-body"><h4>Scalping Institucional</h4><div class="course-meta"><span><i class="fas fa-lock" style="color:var(--text-muted)"></i> Desbloqueie na Meta 2</span></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ AFFILIATE ══ -->
+<section id="affiliate">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Marketplace</div>
+      <h2 class="section-title">Programa de Afiliados</h2>
+      <p class="section-sub">Revenda produtos do ecossistema Barsi com sua propria identidade visual.</p>
+    </div>
+    <div class="aff-card">
+      <div class="aff-grid">
+        <div class="aff-content">
+          <h2>Sua Landing Page,<br><span class="green">Nossa Estrutura</span></h2>
+          <p>Receba uma pagina personalizada com seu logo e identidade visual. Venda cursos, automacoes, indicadores e muito mais.</p>
+          <div class="tier">
+            <div class="tier-icon"><i class="fas fa-medal"></i></div>
+            <div class="tier-info"><div class="tier-name">Bronze</div><div class="tier-desc">Comissao inicial para novos afiliados</div></div>
+            <div class="tier-pct">50%</div>
+          </div>
+          <div class="tier">
+            <div class="tier-icon"><i class="fas fa-medal"></i></div>
+            <div class="tier-info"><div class="tier-name">Prata</div><div class="tier-desc">Desbloqueado por volume de vendas</div></div>
+            <div class="tier-pct">60%</div>
+          </div>
+          <div class="tier">
+            <div class="tier-icon"><i class="fas fa-crown"></i></div>
+            <div class="tier-info"><div class="tier-name">Ouro</div><div class="tier-desc">Top performers do marketplace</div></div>
+            <div class="tier-pct">70%</div>
+          </div>
+          <br>
+          <a href="#" class="btn btn-green"><i class="fas fa-arrow-right"></i> Quero Ser Afiliado</a>
+        </div>
+        <div class="aff-visual">
+          <div class="lp-mock">
+            <div class="lp-head">
+              <div class="lp-brand">Powered by Barsi Bull Trader</div>
+              <h4>@SeuNomeAqui</h4>
+            </div>
+            <div class="lp-body">
+              <div class="lp-product"><div class="lp-name">Automacao Premium</div><div class="lp-price">R$ 297/mes → Comissao: R$ 148</div></div>
+              <div class="lp-product"><div class="lp-name">Jornada do Trader</div><div class="lp-price">R$ 497 → Comissao: R$ 248</div></div>
+              <div class="lp-product"><div class="lp-name">Pack de Indicadores</div><div class="lp-price">R$ 97 → Comissao: R$ 48</div></div>
+              <button class="lp-cta">Acessar Produto</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RESULTS ══ -->
+<section style="padding:0">
+  <div class="results-grid">
+    <div class="result-card"><div class="r-value">+50%</div><div class="r-label">Rentabilidade 2025</div></div>
+    <div class="result-card"><div class="r-value">50+</div><div class="r-label">Estrategias Ativas</div></div>
+    <div class="result-card"><div class="r-value">R$20k</div><div class="r-label">Premios Campeonatos</div></div>
+    <div class="result-card"><div class="r-value">50</div><div class="r-label">Anos no Mercado</div></div>
+  </div>
+</section>
+
+<!-- ══ PRICING ══ -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Planos</div>
+      <h2 class="section-title">Escolha Seu Plano</h2>
+      <p class="section-sub">Comece sua jornada e evolua conforme seus resultados.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="plan-name">Starter</div>
+        <h3>Tartaruga</h3>
+        <div class="price">R$ 197<span>/mes</span></div>
+        <div class="price-sub">Para quem esta comecando</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Diario de Trade Inteligente</li>
+          <li><i class="fas fa-check"></i> Morning Call ao vivo</li>
+          <li><i class="fas fa-check"></i> Conteudo educacional basico</li>
+          <li><i class="fas fa-check"></i> Comunidade e ranking</li>
+          <li><i class="fas fa-check"></i> Calculadora de Meta 1</li>
+          <li class="off"><i class="fas fa-xmark"></i> Acompanhamento Trader</li>
+          <li class="off"><i class="fas fa-xmark"></i> Golden Points</li>
+          <li class="off"><i class="fas fa-xmark"></i> Automacoes &amp; Copy Trade</li>
+        </ul>
+        <a href="#" class="btn btn-outline">Comecar</a>
+      </div>
+      <div class="price-card featured">
+        <div class="plan-name">Pro</div>
+        <h3>Bull</h3>
+        <div class="price">R$ 497<span>/mes</span></div>
+        <div class="price-sub">Para quem busca consistencia</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Tudo do plano Tartaruga</li>
+          <li><i class="fas fa-check"></i> Acompanhamento Trader</li>
+          <li><i class="fas fa-check"></i> Golden Points diarios</li>
+          <li><i class="fas fa-check"></i> Academy completa</li>
+          <li><i class="fas fa-check"></i> Metas 1, 2 e 3</li>
+          <li><i class="fas fa-check"></i> Alertas inteligentes</li>
+          <li><i class="fas fa-check"></i> Campeonatos de Trade</li>
+          <li class="off"><i class="fas fa-xmark"></i> Automacoes &amp; Copy Trade</li>
+        </ul>
+        <a href="#" class="btn btn-green">Assinar Plano Bull</a>
+      </div>
+      <div class="price-card">
+        <div class="plan-name">Elite</div>
+        <h3>Institucional</h3>
+        <div class="price">R$ 997<span>/mes</span></div>
+        <div class="price-sub">Para escalar com tecnologia</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Tudo do plano Bull</li>
+          <li><i class="fas fa-check"></i> Automacoes &amp; Copy Trade</li>
+          <li><i class="fas fa-check"></i> Supervisao estrategica</li>
+          <li><i class="fas fa-check"></i> Relatorios personalizados</li>
+          <li><i class="fas fa-check"></i> Suporte prioritario</li>
+          <li><i class="fas fa-check"></i> Estrategias exclusivas</li>
+          <li><i class="fas fa-check"></i> Consultoria individual</li>
+          <li><i class="fas fa-check"></i> Acesso total</li>
+        </ul>
+        <a href="#" class="btn btn-outline">Falar com Consultor</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section class="cta-section">
+  <div class="container">
+    <h2>O trader tartaruga<br><span class="green">vence a corrida.</span></h2>
+    <p>Junte-se ao ecossistema Barsi Bull Trader e transforme sua jornada no mercado financeiro.</p>
+    <div class="cta-buttons">
+      <a href="#pricing" class="btn btn-green btn-lg"><i class="fas fa-bolt"></i> Comecar Minha Jornada</a>
+      <a href="#" class="btn btn-outline btn-lg"><i class="fab fa-whatsapp"></i> Falar com Consultor</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-brand-name">Barsi Bull<span>Trader</span></div>
+        <p>Ecossistema completo do trader profissional. Tecnologia, estrategia e disciplina com o suporte do Grupo Barsi Investimentos e XP Inc.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <a href="#">Dashboard</a><a href="#">Academy</a><a href="#">Diario de Trade</a><a href="#">Automacoes</a><a href="#">Copy Trade</a>
+      </div>
+      <div class="footer-col">
+        <h4>Produtos</h4>
+        <a href="#">Estrategias</a><a href="#">Jornada do Trader</a><a href="#">Indicadores</a><a href="#">E-books</a><a href="#">Loja</a>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <a href="#">Sobre</a><a href="#">Afiliados</a><a href="#">Termos de Uso</a><a href="#">Privacidade</a><a href="#">Contato</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <p><strong>Aviso de Risco:</strong> Investimentos em renda variavel, incluindo operacoes de day trade, envolvem riscos significativos e podem resultar em perdas superiores ao capital investido. Rentabilidade passada nao e garantia de resultados futuros. A Barsi Bull Trader nao e uma corretora de valores e nao realiza a custodia de ativos. Todas as operacoes sao realizadas atraves da XP Investimentos CCTVM S.A. Antes de investir, consulte um profissional qualificado.</p>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Barsi Bull Trader — Grupo Barsi Investimentos</p>
+      <p style="font-family:var(--mono);font-size:.58rem;letter-spacing:1.5px;color:var(--green);opacity:.4">TECNOLOGIA // ESTRATEGIA // DISCIPLINA</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+// CANDLESTICK ANIMATED BACKGROUND
+// ══════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('candle-canvas');
+  const ctx = canvas.getContext('2d');
+  const GREEN = '#6BFF06';
+  const RED   = '#FF4545';
+  const YELLOW= '#FFC300';
+
+  let W, H, candles = [], frame = 0;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  // Gera uma vela aleatória com posição, tamanho, velocidade
+  function makeCandle(x){
+    const bodyH = 14 + Math.random() * 48;
+    const open  = H * (.15 + Math.random() * .7);
+    const close = open + (Math.random() > .5 ? 1 : -1) * bodyH;
+    const wickT = 6  + Math.random() * 24;
+    const wickB = 6  + Math.random() * 24;
+    const bull  = close < open;
+    return {
+      x,
+      open, close,
+      high: Math.min(open,close) - wickT,
+      low:  Math.max(open,close) + wickB,
+      w: 6 + Math.random() * 10,
+      speed: .12 + Math.random() * .28,
+      alpha: .06 + Math.random() * .18,
+      color: bull ? GREEN : RED,
+      drift: (Math.random() - .5) * .3,
+    };
+  }
+
+  function initCandles(){
+    candles = [];
+    const cols = Math.ceil(W / 28);
+    for(let i = 0; i < cols * 2; i++){
+      const c = makeCandle(Math.random() * W);
+      // espalha verticalmente no início
+      c.open  += (Math.random() - .5) * H * .4;
+      c.close += (Math.random() - .5) * H * .4;
+      c.high  += (Math.random() - .5) * H * .4;
+      c.low   += (Math.random() - .5) * H * .4;
+      candles.push(c);
+    }
+  }
+
+  function drawCandle(c){
+    ctx.globalAlpha = c.alpha;
+    // Pavio
+    ctx.strokeStyle = c.color;
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.high);
+    ctx.lineTo(c.x, c.low);
+    ctx.stroke();
+    // Corpo
+    ctx.fillStyle = c.color;
+    const top = Math.min(c.open, c.close);
+    const bot = Math.max(c.open, c.close);
+    const h   = Math.max(2, bot - top);
+    ctx.fillRect(c.x - c.w/2, top, c.w, h);
+  }
+
+  // Linha de preço animada suave
+  let priceY = H * .45, priceTarget = H * .45, priceArr = [];
+  function buildPrice(){
+    priceArr = [];
+    let y = H * (.3 + Math.random() * .4);
+    for(let x = 0; x <= W; x += 6){
+      y += (Math.random() - .5) * 8;
+      y = Math.max(H*.1, Math.min(H*.9, y));
+      priceArr.push({x, y});
+    }
+  }
+
+  function drawPriceLine(){
+    if(!priceArr.length) return;
+    ctx.globalAlpha = .22;
+    ctx.strokeStyle = YELLOW;
+    ctx.lineWidth   = 1.2;
+    ctx.setLineDash([4,6]);
+    ctx.beginPath();
+    priceArr.forEach((p,i)=> i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+
+    // Move e redesenha velas
+    candles.forEach(c=>{
+      c.open  += c.drift;
+      c.close += c.drift;
+      c.high  += c.drift;
+      c.low   += c.drift;
+      // recicla vela que saiu da tela
+      if(c.low < -80 || c.high > H + 80){
+        const nc = makeCandle(c.x);
+        Object.assign(c, nc);
+      }
+      drawCandle(c);
+    });
+
+    drawPriceLine();
+
+    ctx.globalAlpha = 1;
+    frame++;
+    if(frame % 420 === 0) buildPrice(); // renova linha a cada ~7s
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize',()=>{ resize(); initCandles(); buildPrice(); });
+  resize(); initCandles(); buildPrice(); tick();
+})();
+
+// ══════════════════════════════════════════════
+// FIBONACCI RULER — mede scrollHeight da página
+// As linhas .fib-mark ficam em position:fixed mas
+// seu top% é calculado sobre o scrollHeight total,
+// então a régua sempre cobre do topo ao rodapé.
+// ══════════════════════════════════════════════
+(function(){
+  const marks = document.querySelectorAll('.fib-mark');
+  const rail  = document.getElementById('fib-rail');
+
+  // Percentuais definidos pelo usuário
+  const levels = [0, 38.2, 50, 62, 70.5, 79, 100];
+
+  function place(){
+    const docH  = document.documentElement.scrollHeight;
+    const winH  = window.innerHeight;
+    const scrollY = window.scrollY || 0;
+
+    marks.forEach(m => {
+      const pct = parseFloat(m.dataset.pct);
+      // Posição absoluta no documento (px)
+      const absTop = (pct / 100) * docH;
+      // Posição relativa à viewport atual
+      const viewTop = absTop - scrollY;
+      m.style.top = viewTop + 'px';
+
+      // Oculta se estiver fora da viewport (performance)
+      m.style.display = (viewTop < -2 || viewTop > winH + 2) ? 'none' : 'block';
+    });
+  }
+
+  // Também posiciona o trilho (#fib-rail) sempre visível
+  // O gradiente já representa os níveis — não precisa mover
+
+  window.addEventListener('scroll', place, {passive:true});
+  window.addEventListener('resize', place);
+  // Reagenda após imagens/fontes carregarem (scrollHeight pode mudar)
+  window.addEventListener('load', place);
+  place();
+})();
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+// Entrance animations
+const obs=new IntersectionObserver(e=>{
+  e.forEach(el=>{
+    if(el.isIntersecting){
+      el.target.style.opacity='1';
+      el.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:.08});
+document.querySelectorAll('.eco-card,.product-card,.price-card,.result-card,.course-card,.tier').forEach(el=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(18px)';
+  el.style.transition='opacity .45s ease,transform .45s ease';
+  obs.observe(el);
+});
+
+// Mobile menu
+const mt=document.querySelector('.menu-toggle'),nv=document.querySelector('.nav');
+if(mt)mt.addEventListener('click',()=>{
+  if(nv.style.display==='flex'){
+    nv.style.display='none';
+  }else{
+    nv.style.display='flex';
+    nv.style.position='fixed';
+    nv.style.top='64px';nv.style.left='0';nv.style.right='0';
+    nv.style.background='rgba(8,10,6,.98)';
+    nv.style.flexDirection='column';
+    nv.style.padding='20px';nv.style.gap='14px';
+    nv.style.borderBottom='1px solid #222816';
+    nv.style.zIndex='999';
+  }
+});
+</script>
+</body>
+</html>
